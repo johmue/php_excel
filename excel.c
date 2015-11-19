@@ -69,8 +69,10 @@ ZEND_DECLARE_MODULE_GLOBALS(excel)
 static PHP_GINIT_FUNCTION(excel);
 
 PHP_INI_BEGIN()
+#if defined(HAVE_LIBXL_SETKEY)
 	STD_PHP_INI_ENTRY("excel.license_name", NULL, PHP_INI_ALL, OnUpdateString, ini_license_name, zend_excel_globals, excel_globals)
 	STD_PHP_INI_ENTRY("excel.license_key", NULL, PHP_INI_ALL, OnUpdateString, ini_license_key, zend_excel_globals, excel_globals)
+#endif
 	STD_PHP_INI_ENTRY("excel.skip_empty", "0", PHP_INI_ALL, OnUpdateLong, ini_skip_empty, zend_excel_globals, excel_globals)
 PHP_INI_END()
 
@@ -351,6 +353,18 @@ static zend_object *excel_format_object_clone(zval *this_ptr)
 
 #define EXCEL_METHOD(class_name, function_name) \
 	PHP_METHOD(Excel ## class_name, function_name)
+
+/* {{{ proto bool ExcelBook::requiresKey()
+	true if license key is required. */
+EXCEL_METHOD(Book, requiresKey)
+{
+#if defined(HAVE_LIBXL_SETKEY)
+	RETURN_BOOL(1);
+#else
+	RETURN_BOOL(0);
+#endif
+}
+/* }}} */
 
 /* {{{ proto bool ExcelBook::load(string data)
 	Load Excel data string. */
@@ -1135,6 +1149,20 @@ EXCEL_METHOD(Book, __construct)
 		RETURN_FALSE;
 	}
 
+	BOOK_FROM_OBJECT(book, object);
+
+	if (new_excel) {
+		excel_book_object *obj = (excel_book_object*) Z_EXCEL_BOOK_OBJ_P(object);
+		if ((book = xlCreateXMLBook())) {
+			xlBookRelease(obj->book);
+			obj->book = book;
+		} else {
+			RETURN_FALSE;
+		}
+	}
+
+#if defined(HAVE_LIBXL_SETKEY)
+
 	if (INI_STR("excel.license_name") && INI_STR("excel.license_key")) {
 		name = INI_STR("excel.license_name");
 		name_len = strlen(name);
@@ -1160,19 +1188,9 @@ EXCEL_METHOD(Book, __construct)
 		RETURN_FALSE;
 	}
 
-	BOOK_FROM_OBJECT(book, object);
-
-	if (new_excel) {
-		excel_book_object *obj = (excel_book_object*) Z_EXCEL_BOOK_OBJ_P(object);
-		if ((book = xlCreateXMLBook())) {
-			xlBookRelease(obj->book);
-			obj->book = book;
-		} else {
-			RETURN_FALSE;
-		}
-	}
-
 	xlBookSetKey(book, name_zs->val, key_zs->val);
+
+#endif
 }
 /* }}} */
 
@@ -4489,6 +4507,9 @@ EXCEL_METHOD(Sheet, printArea)
 
 #endif
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_requiresKey, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_load, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
@@ -5359,6 +5380,7 @@ ZEND_END_ARG_INFO()
 	PHP_ME(Excel ## class_name, function_name, arg_info, flags)
 
 zend_function_entry excel_funcs_book[] = {
+	EXCEL_ME(Book, requiresKey, arginfo_Book_requiresKey, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	EXCEL_ME(Book, addFont, arginfo_Book_addFont, 0)
 	EXCEL_ME(Book, addFormat, arginfo_Book_addFormat, 0)
 	EXCEL_ME(Book, getAllFormats, arginfo_Book_getAllFormats, 0)
