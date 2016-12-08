@@ -10,7 +10,7 @@ date.timezone=America/Toronto
 
 	try {
 		$format = new ExcelFormat();
-	} catch (Exception $e) {
+	} catch (Throwable $e) {
 		var_dump($e->getMessage());
 	}
 
