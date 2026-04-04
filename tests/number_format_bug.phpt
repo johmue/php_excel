@@ -13,11 +13,11 @@ $number_format = $book->addFormat();
 $number_format->numberFormat($cfid);
 
 $sheet = $book->addSheet('Sheet 1');
-$sheet->write(0, 0, 10, $number_format);
+$sheet->write(1, 0, 10, $number_format);
 
 var_dump(
-	$sheet->isDate(0, 0),
-	$sheet->read(0, 0)
+	$sheet->isDate(1, 0),
+	$sheet->read(1, 0)
 );
 ?>
 --EXPECT--

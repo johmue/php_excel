@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -28,6 +26,7 @@ ZEND_BEGIN_MODULE_GLOBALS(excel)
 	int ini_skip_empty;
 ZEND_END_MODULE_GLOBALS(excel)
 
+#define EXCEL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(excel, v)
 
 #ifdef PHP_WIN32
 #define PHP_EXCEL_API __declspec(dllexport)
@@ -35,33 +34,9 @@ ZEND_END_MODULE_GLOBALS(excel)
 #define PHP_EXCEL_API
 #endif
 
-#ifdef ZTS
-#include "TSRM.h"
-#endif
-
-# define PHP_EXCEL_ERROR_HANDLING() \
+#define PHP_EXCEL_ERROR_HANDLING() \
 	zend_error_handling error_handling; \
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
-# define PHP_EXCEL_RESTORE_ERRORS() zend_restore_error_handling(&error_handling TSRMLS_CC);
-
-#ifndef Z_SET_ISREF_P
-# define Z_SET_ISREF_P(pz)				(pz)->is_ref = 1
-# define Z_SET_ISREF_PP(ppz)			Z_SET_ISREF_P(*(ppz))
-# define Z_SET_ISREF(z)				Z_SET_ISREF_P(&(z))
-#endif
-
-#ifndef Z_SET_REFCOUNT_P
-# define Z_SET_REFCOUNT_P(pz, rc)      (pz)->refcount = rc
-# define Z_SET_REFCOUNT_PP(ppz, rc)    Z_SET_REFCOUNT_P(*(ppz), rc)
-#endif
+	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
+#define PHP_EXCEL_RESTORE_ERRORS() zend_restore_error_handling(&error_handling);
 
 #endif	/* PHP_EXCEL_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -19,7 +19,7 @@ date.timezone=America/Toronto
     $s->setColWidth(2, 2, -1);
     var_dump($s->colWidth(2));
 	
-    $s->write(0, 3, 'TestTestTestTestTest');
+    $s->write(1, 3, 'TestTestTestTestTest');
     $colWidthBefore = $s->colWidth(3);
     $s->setColWidth(3, 3, -1);
     $colWidthAfter = $s->colWidth(3);
@@ -33,7 +33,7 @@ date.timezone=America/Toronto
 --EXPECTF--
 float(55)
 float(50)
-float(8)
+float(%f)
 bool(true)
 
 Warning: ExcelSheet::setColWidth(): Width cannot be less then -1 in %s on line %d

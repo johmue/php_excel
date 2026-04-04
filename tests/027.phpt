@@ -12,7 +12,7 @@ date.timezone=America/Toronto
 
 	$data = array(true, 1.222, 434324, "fsdfasDF", NULL, "");
 	foreach ($data as $k => $v) {
-		$s->write($k, 1, $v);
+		$s->write($k + 1, 1, $v);
 		var_dump($x->getError());
 	}
 
@@ -26,7 +26,7 @@ date.timezone=America/Toronto
 	}
 
 	for ($i = 0, $c = count($data); $i < $c; $i++) {
-		var_dump($type[$s->cellType($i, 1)]);
+		var_dump($type[$s->cellType($i + 1, 1)]);
 	}
 
 	$format = $x->addFormat();
@@ -43,12 +43,12 @@ date.timezone=America/Toronto
 	);
 
 	foreach ($data as $k => $v) {
-		var_dump($s->write(4, $k, $v[0], (isset($v[2]) ? $v[2] : NULL), $v[1]));
+		var_dump($s->write(5, $k, $v[0], (isset($v[2]) ? $v[2] : NULL), $v[1]));
 		var_dump($x->getError());
 	}
 	for ($i = 0, $c = count($data); $i < $c; $i++) {
-		var_dump($s->isFormula(4, $i));
-		var_dump($s->isDate(4, $i));
+		var_dump($s->isFormula(5, $i));
+		var_dump($s->isDate(5, $i));
 	}
 
 	echo "OK\n";

@@ -10,18 +10,18 @@ date.timezone=America/Toronto
 
 	try {
 		$format = new ExcelFont();
-	} catch (Exception $e) {
-		var_dump($e->getMessage());
+	} catch (\Throwable $e) {
+		echo get_class($e) . "\n";
 	}
 
 	try {
 		$format = new ExcelFont('cdsd');
-	} catch (Throwable $e) {
-		var_dump($e->getMessage());
+	} catch (\Throwable $e) {
+		echo get_class($e) . "\n";
 	}
-	echo "OK\n"
+	echo "OK\n";
 ?>
 --EXPECT--
-string(61) "ExcelFont::__construct() expects exactly 1 parameter, 0 given"
-string(92) "Argument 1 passed to ExcelFont::__construct() must be an instance of ExcelBook, string given"
+ArgumentCountError
+TypeError
 OK

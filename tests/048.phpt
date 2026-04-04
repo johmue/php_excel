@@ -13,21 +13,21 @@ date.timezone=America/Toronto
 	$data = array(true, 1.222, 434324, "fsdfasDF", NULL, "", false, -3321, -77.3321, "a a a a a aa");
 
 	for ($i = 0; $i < 10; $i++) {
-		for ($j = 0; $j < 10; $j++) {
-			$s->write($j, $i, $data[$j]);
+		for ($j = 1; $j < 11; $j++) {
+			$s->write($j, $i, $data[$j - 1]);
 		}
 	}
 
-	var_dump($s->readCol(2), $x->getError());
-	var_dump($s->readCol(2, 4), $x->getError());	
-	var_dump($s->readCol(2, 5, 5), $x->getError());
+	var_dump($s->readCol(2, 1), $x->getError());
+	var_dump($s->readCol(2, 5), $x->getError());
+	var_dump($s->readCol(2, 6, 6), $x->getError());
 
 	var_dump($s->readCol(-2));
 	var_dump($s->readCol(22));
 	var_dump($s->readCol(2, -1));
 	var_dump($s->readCol(2, 55));
-	var_dump($s->readCol(2, 2, 1));
-	var_dump($s->readCol(2, 2, 39));
+	var_dump($s->readCol(2, 3, 1));
+	var_dump($s->readCol(2, 3, 39));
 	
 	echo "OK\n";
 ?>

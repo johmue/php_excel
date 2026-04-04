@@ -13,7 +13,7 @@ date.timezone=America/Toronto
 	$data = "Test";
 	$oClass = new ReflectionClass('ExcelFormat');
 
-	$row = $col = 0;
+	$row = 1; $col = 0;
 
 	foreach (array('', 'Left','Right','Top','Bottom') as $b) {
 		foreach ($oClass->getConstants() as $c => $val) {

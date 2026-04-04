@@ -15,16 +15,16 @@ date.timezone=America/Toronto
 	$format = $x->addFormat();
 	$format->hidden(true);
 
-	var_dump($s->write(0, 1, $data, $format));
+	var_dump($s->write(1, 1, $data, $format));
 	var_dump($x->getError());
 
-	var_dump($s->write(1, 0, $data, $format));
+	var_dump($s->write(2, 0, $data, $format));
 	var_dump($x->getError());
 
-	$s->read(1, 0, $format);
+	$s->read(2, 0, $format);
 	echo (int)$format->hidden() . "\n";
 
-	$s->read(0, 1, $format);
+	$s->read(1, 1, $format);
 	echo (int)$format->hidden() . "\n";
 
 

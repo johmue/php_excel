@@ -8,12 +8,12 @@ $book = new ExcelBook();
 
 $sheet = $book->addSheet('Sheet 1');
 
-$sheet->write(0, 0, NULL);
-$sheet->writeRow(1, array(1, NULL));
+$sheet->write(1, 0, NULL);
+$sheet->writeRow(2, array(1, NULL));
 
 var_dump(
-	$sheet->read(0, 0),
-	$sheet->readRow(1)
+	$sheet->read(1, 0),
+	$sheet->readRow(2)
 );
 ?>
 --EXPECT--

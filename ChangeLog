@@ -1,3 +1,13 @@
+[2026-04-04] - Version 2.0.0
+	* Added PHP 8.3, 8.4, 8.5 and master support
+	* Minimum PHP version is now 8.3
+	* Minimum LibXL version is now 4.6.0
+	* Removed all LIBXL_VERSION conditional compilation guards
+	* Fixed memory leaks in setProtect(), addDataValidation(), addDataValidationDouble()
+	* Fixed compatibility with PHP 8.x clone handler signature
+	* Fixed null-to-string deprecation in ExcelBook constructor
+	* Updated tests for PHP 8.x and LibXL 5.x compatibility
+
 [2018-??-??] - Version 1.0.3dev
 	* Fixed crash when trying to read an empty file
 	* Fixed bug with writing references (see issue #234)

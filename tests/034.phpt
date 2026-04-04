@@ -11,12 +11,12 @@ date.timezone=America/Toronto
 	$s = $x->addSheet("Sheet 1");
 
 	for ($i = 0; $i < 10; $i++) {
-		for ($j = 0; $j < 10; $j++) {
+		for ($j = 1; $j < 11; $j++) {
 			$s->write($j, $i, "{$j} {$i}");
 		}
 	}
 
-	$s->clear(2,4,3,5);
+	$s->clear(3,4,4,5);
 	var_dump($x->getError());
 
 

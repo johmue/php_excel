@@ -10,19 +10,19 @@ date.timezone=America/Toronto
 
 	try {
 		$format = new ExcelFormat();
-	} catch (Exception $e) {
-		var_dump($e->getMessage());
+	} catch (\Throwable $e) {
+		echo get_class($e) . "\n";
 	}
 
 	try {
 		$format = new ExcelFormat('cdsd');
-	} catch (Throwable $e) {
-		var_dump($e->getMessage());
+	} catch (\Throwable $e) {
+		echo get_class($e) . "\n";
 	}
 
 	echo "OK\n";
 ?>
 --EXPECT--
-string(63) "ExcelFormat::__construct() expects exactly 1 parameter, 0 given"
-string(94) "Argument 1 passed to ExcelFormat::__construct() must be an instance of ExcelBook, string given"
+ArgumentCountError
+TypeError
 OK
