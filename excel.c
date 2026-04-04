@@ -33,11 +33,13 @@
 #error "LibXL version 4.6.0+ required"
 #endif
 
-/* work-around for buggy macros in libxl.h */
+/* work-around for buggy/missing macros in libxl.h */
+#if LIBXL_VERSION >= 0x05010000
 #undef xlSheetRemoveConditionalFormatting
 #define xlSheetRemoveConditionalFormatting xlSheetRemoveConditionalFormattingA
 #undef xlSheetConditionalFormattingSize
 #define xlSheetConditionalFormattingSize xlSheetConditionalFormattingSizeA
+#endif
 #ifndef xlSheetSetBorder
 #define xlSheetSetBorder xlSheetSetBorderA
 #endif
@@ -1870,6 +1872,23 @@ EXCEL_METHOD(Book, removePrinterSettings)
 	RETURN_BOOL(xlBookRemovePrinterSettings(book));
 }
 
+#if LIBXL_VERSION >= 0x05000000
+EXCEL_METHOD(Book, setPassword)
+{
+	BookHandle book;
+	zval *object = ZEND_THIS;
+	zend_string *password;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &password) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	BOOK_FROM_OBJECT(book, object);
+
+	xlBookSetPassword(book, ZSTR_VAL(password));
+	RETURN_TRUE;
+}
+
 EXCEL_METHOD(Book, dpiAwareness)
 {
 	BookHandle book;
@@ -1897,6 +1916,87 @@ EXCEL_METHOD(Book, setDpiAwareness)
 	xlBookSetDpiAwareness(book, val);
 	RETURN_TRUE;
 }
+#endif
+
+#if LIBXL_VERSION >= 0x05000100
+EXCEL_METHOD(Book, loadInfoRaw)
+{
+	BookHandle book;
+	zval *object = ZEND_THIS;
+	zend_string *data;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &data) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	BOOK_FROM_OBJECT(book, object);
+
+	RETURN_BOOL(xlBookLoadInfoRaw(book, ZSTR_VAL(data), ZSTR_LEN(data)));
+}
+#endif
+
+#if LIBXL_VERSION >= 0x05010000
+EXCEL_METHOD(Book, errorCode)
+{
+	BookHandle book;
+	zval *object = ZEND_THIS;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	BOOK_FROM_OBJECT(book, object);
+
+	RETURN_LONG(xlBookErrorCode(book));
+}
+
+EXCEL_METHOD(Book, conditionalFormat)
+{
+	BookHandle book;
+	zval *object = ZEND_THIS;
+	zend_long index;
+	excel_conditionalformat_object *cfo;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	BOOK_FROM_OBJECT(book, object);
+
+	ConditionalFormatHandle cfh = xlBookConditionalFormat(book, index);
+	if (!cfh) {
+		RETURN_FALSE;
+	}
+
+	ZVAL_OBJ(return_value, excel_object_new_conditionalformat(excel_ce_conditionalformat));
+	cfo = Z_EXCEL_CONDITIONALFORMAT_OBJ_P(return_value);
+	cfo->conditionalformat = cfh;
+	cfo->book = book;
+}
+
+EXCEL_METHOD(Book, conditionalFormatSize)
+{
+	BookHandle book;
+	zval *object = ZEND_THIS;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	BOOK_FROM_OBJECT(book, object);
+
+	RETURN_LONG(xlBookConditionalFormatSize(book));
+}
+
+EXCEL_METHOD(Book, clear)
+{
+	BookHandle book;
+	zval *object = ZEND_THIS;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	BOOK_FROM_OBJECT(book, object);
+
+	xlBookClear(book);
+	RETURN_TRUE;
+}
+#endif
 
 EXCEL_METHOD(Book, coreProperties)
 {
@@ -6302,9 +6402,10 @@ EXCEL_METHOD(Sheet, addConditionalFormatting)
 {
 	zval *object = ZEND_THIS;
 	SheetHandle sheet;
-	zend_long rowFirst, rowLast, colFirst, colLast;
 	ConditionalFormattingHandle cfh;
 	excel_conditionalformatting_object *cfo;
+#if LIBXL_VERSION >= 0x05010000
+	zend_long rowFirst, rowLast, colFirst, colLast;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "llll", &rowFirst, &rowLast, &colFirst, &colLast) == FAILURE) {
 		RETURN_FALSE;
@@ -6313,6 +6414,13 @@ EXCEL_METHOD(Sheet, addConditionalFormatting)
 	SHEET_FROM_OBJECT(sheet, object);
 
 	cfh = xlSheetAddConditionalFormatting(sheet, rowFirst, rowLast, colFirst, colLast);
+#else
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	SHEET_FROM_OBJECT(sheet, object);
+
+	cfh = xlSheetAddConditionalFormatting(sheet);
+#endif
 	if (!cfh) {
 		RETURN_FALSE;
 	}
@@ -6323,6 +6431,7 @@ EXCEL_METHOD(Sheet, addConditionalFormatting)
 	cfo->sheet = sheet;
 }
 
+#if LIBXL_VERSION >= 0x05010000
 EXCEL_METHOD(Sheet, conditionalFormatting)
 {
 	zval *object = ZEND_THIS;
@@ -6374,6 +6483,7 @@ EXCEL_METHOD(Sheet, conditionalFormattingSize)
 
 	RETURN_LONG(xlSheetConditionalFormattingSize(sheet));
 }
+#endif
 
 /* RichString methods */
 
@@ -7388,17 +7498,27 @@ EXCEL_METHOD(ConditionalFormatting, __construct)
 	zval *object = ZEND_THIS;
 	excel_conditionalformatting_object *obj;
 	zval *zsheet;
+#if LIBXL_VERSION >= 0x05010000
 	zend_long rowFirst, rowLast, colFirst, colLast;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ollll", &zsheet, excel_ce_sheet, &rowFirst, &rowLast, &colFirst, &colLast) == FAILURE) {
 		return;
 	}
+#else
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &zsheet, excel_ce_sheet) == FAILURE) {
+		return;
+	}
+#endif
 
 	SHEET_FROM_OBJECT(sheet, zsheet);
 
 	obj = Z_EXCEL_CONDITIONALFORMATTING_OBJ_P(object);
 
+#if LIBXL_VERSION >= 0x05010000
 	cfh = xlSheetAddConditionalFormatting(sheet, rowFirst, rowLast, colFirst, colLast);
+#else
+	cfh = xlSheetAddConditionalFormatting(sheet);
+#endif
 	if (!cfh) {
 		zend_throw_exception(NULL, "Failed to create conditional formatting", 0);
 		RETURN_THROWS();
@@ -9056,12 +9176,39 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_removePrinterSettings, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
+#if LIBXL_VERSION >= 0x05000000
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_setPassword, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_dpiAwareness, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_setDpiAwareness, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
+
+#if LIBXL_VERSION >= 0x05000100
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_loadInfoRaw, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if LIBXL_VERSION >= 0x05010000
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_errorCode, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Book_conditionalFormat, 0, 1, ExcelConditionalFormat, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_conditionalFormatSize, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_clear, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Book_coreProperties, 0, 0, ExcelCoreProperties, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
@@ -9212,6 +9359,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_applyFilter2, 0, 1, _IS_BO
 	ZEND_ARG_OBJ_INFO(0, autoFilter, ExcelAutoFilter, 0)
 ZEND_END_ARG_INFO()
 
+#if LIBXL_VERSION >= 0x05010000
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Sheet_addConditionalFormatting, 0, 4, ExcelConditionalFormatting, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, rowFirst, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, rowLast, IS_LONG, 0)
@@ -9229,6 +9377,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_conditionalFormattingSize, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
+#else
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Sheet_addConditionalFormatting, 0, 0, ExcelConditionalFormatting, MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
+#endif
 
 /* AutoFilter addSort arginfo */
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_AutoFilter_addSort, 0, 2, _IS_BOOL, 0)
@@ -9304,13 +9456,19 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormat_setString, 0, 
 ZEND_END_ARG_INFO()
 
 /* ConditionalFormatting arginfo */
+#if LIBXL_VERSION >= 0x05010000
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting___construct, 0, 0, 5)
 	ZEND_ARG_OBJ_INFO(0, sheet, ExcelSheet, 0)
-	ZEND_ARG_INFO(0, rowFirst)
+	ZEND_ARG_TYPE_INFO(0, rowFirst, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, rowLast, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, colFirst, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, colLast, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#else
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, sheet, ExcelSheet, 0)
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormatting_addRange, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, rowFirst, IS_LONG, 0)
@@ -9522,8 +9680,20 @@ const zend_function_entry excel_funcs_book[] = {
 	EXCEL_ME(Book, addFormatFromStyle, arginfo_Book_addFormatFromStyle, 0)
 	EXCEL_ME(Book, removeVBA, arginfo_Book_removeVBA, 0)
 	EXCEL_ME(Book, removePrinterSettings, arginfo_Book_removePrinterSettings, 0)
+#if LIBXL_VERSION >= 0x05000000
+	EXCEL_ME(Book, setPassword, arginfo_Book_setPassword, 0)
 	EXCEL_ME(Book, dpiAwareness, arginfo_Book_dpiAwareness, 0)
 	EXCEL_ME(Book, setDpiAwareness, arginfo_Book_setDpiAwareness, 0)
+#endif
+#if LIBXL_VERSION >= 0x05000100
+	EXCEL_ME(Book, loadInfoRaw, arginfo_Book_loadInfoRaw, 0)
+#endif
+#if LIBXL_VERSION >= 0x05010000
+	EXCEL_ME(Book, errorCode, arginfo_Book_errorCode, 0)
+	EXCEL_ME(Book, conditionalFormat, arginfo_Book_conditionalFormat, 0)
+	EXCEL_ME(Book, conditionalFormatSize, arginfo_Book_conditionalFormatSize, 0)
+	EXCEL_ME(Book, clear, arginfo_Book_clear, 0)
+#endif
 	EXCEL_ME(Book, coreProperties, arginfo_Book_coreProperties, 0)
 	EXCEL_ME(Book, removeAllPhonetics, arginfo_Book_removeAllPhonetics, 0)
 	{NULL, NULL, NULL}
@@ -9694,9 +9864,11 @@ const zend_function_entry excel_funcs_sheet[] = {
 	EXCEL_ME(Sheet, getTableByIndex, arginfo_Sheet_getTableByIndex, 0)
 	EXCEL_ME(Sheet, applyFilter2, arginfo_Sheet_applyFilter2, 0)
 	EXCEL_ME(Sheet, addConditionalFormatting, arginfo_Sheet_addConditionalFormatting, 0)
+#if LIBXL_VERSION >= 0x05010000
 	EXCEL_ME(Sheet, conditionalFormatting, arginfo_Sheet_conditionalFormatting, 0)
 	EXCEL_ME(Sheet, removeConditionalFormatting, arginfo_Sheet_removeConditionalFormatting, 0)
 	EXCEL_ME(Sheet, conditionalFormattingSize, arginfo_Sheet_conditionalFormattingSize, 0)
+#endif
 	{NULL, NULL, NULL}
 };
 
