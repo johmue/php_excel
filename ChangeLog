@@ -7,6 +7,37 @@
 	* Fixed compatibility with PHP 8.x clone handler signature
 	* Fixed null-to-string deprecation in ExcelBook constructor
 	* Updated tests for PHP 8.x and LibXL 5.x compatibility
+	* Added new classes:
+		- ExcelRichString (rich text with mixed fonts in a single cell)
+		- ExcelFormControl (checkboxes, dropdowns, buttons, spinners, etc.)
+		- ExcelConditionalFormat (conditional formatting style rules)
+		- ExcelConditionalFormatting (conditional formatting ranges and rules)
+		- ExcelCoreProperties (workbook metadata: title, author, dates, etc.)
+		- ExcelTable (structured table support for xlsx)
+	* Added new ExcelBook methods:
+		- addRichString(), calcMode(), setCalcMode()
+		- addConditionalFormat(), addFormatFromStyle()
+		- removeVBA(), removePrinterSettings()
+		- dpiAwareness(), setDpiAwareness()
+		- coreProperties(), removeAllPhonetics()
+	* Added new ExcelSheet methods:
+		- firstFilledRow(), lastFilledRow(), firstFilledCol(), lastFilledCol()
+		- removePicture(), removePictureByIndex()
+		- isRichStr(), readRichStr(), writeRichStr()
+		- formControlSize(), formControl()
+		- getActiveCell(), setActiveCell()
+		- selectionRange(), addSelectionRange(), removeSelection()
+		- tabColor(), getTabRgbColor(), setTabRgbColor()
+		- hyperlinkIndex()
+		- colWidthPx(), rowHeightPx(), colFormat(), rowFormat()
+		- setColPx(), setRowPx(), setBorder()
+		- addTable(), getTableByName(), getTableByIndex()
+		- applyFilter2()
+		- addConditionalFormatting(), conditionalFormatting()
+		- removeConditionalFormatting(), conditionalFormattingSize()
+	* Added ExcelAutoFilter::addSort()
+	* Added constants for CalcMode, CellStyle, TableStyle, FormControl types,
+	  ConditionalFormat types/operators/time periods, and CFVOType
 
 [2018-??-??] - Version 1.0.3dev
 	* Fixed crash when trying to read an empty file
