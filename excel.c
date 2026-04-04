@@ -42,11 +42,11 @@
 #define xlSheetSetBorder xlSheetSetBorderA
 #endif
 
-static long xlFormatBorder(FormatHandle f)
+static zend_long xlFormatBorder(FormatHandle f)
 {
 	return 1;
 }
-static long xlFormatBorderColor(FormatHandle f)
+static zend_long xlFormatBorderColor(FormatHandle f)
 {
 	return 1;
 }
@@ -864,9 +864,9 @@ EXCEL_METHOD(Book, getSheetByName)
 	BookHandle book;
 	zval *object = getThis();
 	zend_string *sheet_name_zs = NULL;
-	long sheet;
+	zend_long sheet;
 	excel_sheet_object *fo;
-	long sheet_count;
+	zend_long sheet_count;
 	bool case_s = 0;
 	const char *s;
 
@@ -928,7 +928,7 @@ EXCEL_METHOD(Book, activeSheet)
 	BookHandle book;
 	zval *object = getThis();
 	zend_long sheet = -1;
-	long res;
+	zend_long res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &sheet) == FAILURE) {
 		RETURN_FALSE;
@@ -1211,7 +1211,7 @@ EXCEL_METHOD(Book, getCustomFormat)
 }
 /* }}} */
 
-static double _php_excel_date_pack(BookHandle book, long ts)
+static double _php_excel_date_pack(BookHandle book, zend_long ts)
 {
 	struct tm tm;
 
@@ -1310,7 +1310,7 @@ EXCEL_METHOD(Book, packDateValues)
 }
 /* }}} */
 
-static long _php_excel_date_unpack(BookHandle book, double dt)
+static zend_long _php_excel_date_unpack(BookHandle book, double dt)
 {
 	struct tm tm = {0};
 	int msec;
@@ -1488,7 +1488,8 @@ EXCEL_METHOD(Book, __construct)
 			xlBookRelease(obj->book);
 			obj->book = book;
 		} else {
-			RETURN_FALSE;
+			zend_throw_exception(NULL, "Failed to create XLSX book", 0);
+			RETURN_THROWS();
 		}
 	}
 
@@ -2128,7 +2129,8 @@ EXCEL_METHOD(Format, __construct)
 
 	format = xlBookAddFormat(book, NULL);
 	if (!format) {
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "Failed to add format", 0);
+		RETURN_THROWS();
 	}
 
 	obj->format = format;
@@ -2156,7 +2158,8 @@ EXCEL_METHOD(Font, __construct)
 
 	font = xlBookAddFont(book, NULL);
 	if (!font) {
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "Failed to add font", 0);
+		RETURN_THROWS();
 	}
 
 	obj->font = font;
@@ -2497,9 +2500,13 @@ EXCEL_METHOD(Sheet, __construct)
 	}
 
 	if (!zbook) {
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "ExcelBook is required", 0);
+		RETURN_THROWS();
 	}
-	EXCEL_NON_EMPTY_STRING(name_zs)
+	if (!name_zs || ZSTR_LEN(name_zs) < 1) {
+		zend_throw_exception(NULL, "Sheet name cannot be empty", 0);
+		RETURN_THROWS();
+	}
 
 	BOOK_FROM_OBJECT(book, zbook);
 
@@ -2508,7 +2515,8 @@ EXCEL_METHOD(Sheet, __construct)
 	sh = xlBookAddSheet(book, ZSTR_VAL(name_zs), 0);
 
 	if (!sh) {
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "Failed to add sheet", 0);
+		RETURN_THROWS();
 	}
 
 	obj->sheet = sh;
@@ -2609,7 +2617,7 @@ bool php_excel_read_cell(int row, int col, zval *val, SheetHandle sheet, BookHan
 		case CELLTYPE_NUMBER: {
 			double d = xlSheetReadNum(sheet, row, col, format);
 			if (xlSheetIsDate(sheet, row, col)) {
-				long dt = _php_excel_date_unpack(book, d);
+				zend_long dt = _php_excel_date_unpack(book, d);
 				if (dt == -1) {
 					return 0;
 				} else {
@@ -2803,7 +2811,7 @@ EXCEL_METHOD(Sheet, read)
 }
 /* }}} */
 
-bool php_excel_write_cell(SheetHandle sheet, BookHandle book, int row, int col, zval *data, FormatHandle format, long dtype)
+bool php_excel_write_cell(SheetHandle sheet, BookHandle book, int row, int col, zval *data, FormatHandle format, zend_long dtype)
 {
 	zend_string *data_zs;
 
@@ -2929,7 +2937,7 @@ EXCEL_METHOD(Sheet, writeRow)
 	zval *oformat = NULL;
 	zval *data;
 	zval *element;
-	long i;
+	zend_long i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "la|lO", &row, &data, &col, &oformat, excel_ce_format) == FAILURE) {
 		RETURN_FALSE;
@@ -2975,7 +2983,7 @@ EXCEL_METHOD(Sheet, writeCol)
 	zval *oformat = NULL;
 	zval *data;
 	zval *element;
-	long i;
+	zend_long i;
 	zend_long dtype = -1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "la|lO!l", &col, &data, &row, &oformat, excel_ce_format, &dtype) == FAILURE) {
@@ -5100,8 +5108,6 @@ EXCEL_METHOD(Sheet, autoFilter)
 	obj = Z_EXCEL_AUTOFILTER_OBJ_P(return_value);
 	obj->autofilter = ah;
 	obj->sheet = sheet;
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -5212,10 +5218,6 @@ EXCEL_METHOD(AutoFilter, __construct)
 		return;
 	}
 
-	if (!zsheet) {
-		RETURN_FALSE;
-	}
-
 	SHEET_FROM_OBJECT(sheet, zsheet);
 
 	obj = Z_EXCEL_AUTOFILTER_OBJ_P(object);
@@ -5223,7 +5225,8 @@ EXCEL_METHOD(AutoFilter, __construct)
 	afh = xlSheetAutoFilter(sheet);
 
 	if (!afh) {
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "Failed to create autofilter", 0);
+		RETURN_THROWS();
 	}
 
 	obj->sheet = sheet;
@@ -5432,10 +5435,6 @@ EXCEL_METHOD(FilterColumn, __construct)
 		return;
 	}
 
-	if (!zautofilter) {
-		RETURN_FALSE;
-	}
-
 	AUTOFILTER_FROM_OBJECT(autofilter, zautofilter);
 
 	obj = Z_EXCEL_FILTERCOLUMN_OBJ_P(object);
@@ -5443,7 +5442,8 @@ EXCEL_METHOD(FilterColumn, __construct)
 	fch = xlAutoFilterColumn(autofilter, colId);
 
 	if (!fch) {
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "Failed to get filter column", 0);
+		RETURN_THROWS();
 	}
 
 	obj->filtercolumn = fch;
@@ -5648,7 +5648,7 @@ EXCEL_METHOD(Book, addPictureAsLink)
 	BookHandle book;
 	zend_string *filename;
 	bool insert = 0;
-	long result;
+	zend_long result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &filename, &insert) == FAILURE) {
 		RETURN_FALSE;
@@ -6396,7 +6396,8 @@ EXCEL_METHOD(RichString, __construct)
 
 	rs = xlBookAddRichString(book);
 	if (!rs) {
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "Failed to create rich string", 0);
+		RETURN_THROWS();
 	}
 
 	obj->richstring = rs;
@@ -6529,7 +6530,8 @@ EXCEL_METHOD(FormControl, __construct)
 
 	fc = xlSheetFormControl(sheet, index);
 	if (!fc) {
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "Failed to get form control", 0);
+		RETURN_THROWS();
 	}
 
 	obj->formcontrol = fc;
@@ -7046,7 +7048,8 @@ EXCEL_METHOD(ConditionalFormat, __construct)
 
 	cf = xlBookAddConditionalFormat(book);
 	if (!cf) {
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "Failed to create conditional format", 0);
+		RETURN_THROWS();
 	}
 
 	obj->conditionalformat = cf;
@@ -7398,7 +7401,8 @@ EXCEL_METHOD(ConditionalFormatting, __construct)
 
 	cfh = xlSheetAddConditionalFormatting(sheet, rowFirst, rowLast, colFirst, colLast);
 	if (!cfh) {
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "Failed to create conditional formatting", 0);
+		RETURN_THROWS();
 	}
 
 	obj->conditionalformatting = cfh;
@@ -7631,7 +7635,8 @@ EXCEL_METHOD(CoreProperties, __construct)
 
 	cp = xlBookCoreProperties(book);
 	if (!cp) {
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "Failed to get core properties", 0);
+		RETURN_THROWS();
 	}
 
 	obj->coreproperties = cp;
@@ -7757,7 +7762,8 @@ EXCEL_METHOD(Table, __construct)
 
 	th = xlSheetAddTable(sheet, ZSTR_VAL(name), rowFirst, rowLast, colFirst, colLast, hasHeaders, style);
 	if (!th) {
-		RETURN_FALSE;
+		zend_throw_exception(NULL, "Failed to create table", 0);
+		RETURN_THROWS();
 	}
 
 	obj->table = th;
@@ -9493,7 +9499,7 @@ const zend_function_entry excel_funcs_book[] = {
 	EXCEL_ME(Book, colorUnpack, arginfo_Book_colorUnpack, 0)
 	EXCEL_ME(Book, isDate1904, arginfo_Book_isDate1904, 0)
 	EXCEL_ME(Book, setDate1904, arginfo_Book_setDate1904, 0)
-	EXCEL_ME(Book, __construct, arginfo_Book___construct, 0)
+	EXCEL_ME(Book, __construct, arginfo_Book___construct, ZEND_ACC_PUBLIC)
 	EXCEL_ME(Book, biffVersion, arginfo_Book_biffVersion, 0)
 	EXCEL_ME(Book, setRefR1C1, arginfo_Book_setRefR1C1, 0)
 	EXCEL_ME(Book, getRefR1C1, arginfo_Book_getRefR1C1, 0)
@@ -9524,7 +9530,7 @@ const zend_function_entry excel_funcs_book[] = {
 };
 
 const zend_function_entry excel_funcs_sheet[] = {
-	EXCEL_ME(Sheet, __construct, arginfo_Sheet___construct, 0)
+	EXCEL_ME(Sheet, __construct, arginfo_Sheet___construct, ZEND_ACC_PUBLIC)
 	EXCEL_ME(Sheet, cellType, arginfo_Sheet_cellType, 0)
 	EXCEL_ME(Sheet, cellFormat, arginfo_Sheet_cellFormat, 0)
 	EXCEL_ME(Sheet, setCellFormat, arginfo_Sheet_setCellFormat, 0)
@@ -9734,12 +9740,12 @@ const zend_function_entry excel_funcs_format[] = {
 	EXCEL_ME(Format, patternBackgroundColor, arginfo_Format_patternBackgroundColor, 0)
 	EXCEL_ME(Format, locked, arginfo_Format_locked, 0)
 	EXCEL_ME(Format, hidden, arginfo_Format_hidden, 0)
-	EXCEL_ME(Format, __construct, arginfo_Format___construct, 0)
+	EXCEL_ME(Format, __construct, arginfo_Format___construct, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
 const zend_function_entry excel_funcs_autofilter[] = {
-	EXCEL_ME(AutoFilter, __construct, arginfo_AutoFilter___construct, 0)
+	EXCEL_ME(AutoFilter, __construct, arginfo_AutoFilter___construct, ZEND_ACC_PUBLIC)
 	EXCEL_ME(AutoFilter, getRef, arginfo_AutoFilter_getRef, 0)
 	EXCEL_ME(AutoFilter, setRef, arginfo_AutoFilter_setRef, 0)
 	EXCEL_ME(AutoFilter, column, arginfo_AutoFilter_column, 0)
@@ -9753,7 +9759,7 @@ const zend_function_entry excel_funcs_autofilter[] = {
 };
 
 const zend_function_entry excel_funcs_filtercolumn[] = {
-	EXCEL_ME(FilterColumn, __construct, arginfo_FilterColumn___construct, 0)
+	EXCEL_ME(FilterColumn, __construct, arginfo_FilterColumn___construct, ZEND_ACC_PUBLIC)
 	EXCEL_ME(FilterColumn, index, arginfo_FilterColumn_index, 0)
 	EXCEL_ME(FilterColumn, filterType, arginfo_FilterColumn_filterType, 0)
 	EXCEL_ME(FilterColumn, filterSize, arginfo_FilterColumn_filterSize, 0)
@@ -9768,7 +9774,7 @@ const zend_function_entry excel_funcs_filtercolumn[] = {
 };
 
 const zend_function_entry excel_funcs_richstring[] = {
-	EXCEL_ME(RichString, __construct, arginfo_RichString___construct, 0)
+	EXCEL_ME(RichString, __construct, arginfo_RichString___construct, ZEND_ACC_PUBLIC)
 	EXCEL_ME(RichString, addFont, arginfo_RichString_addFont, 0)
 	EXCEL_ME(RichString, addText, arginfo_RichString_addText, 0)
 	EXCEL_ME(RichString, getText, arginfo_RichString_getText, 0)
@@ -9777,7 +9783,7 @@ const zend_function_entry excel_funcs_richstring[] = {
 };
 
 const zend_function_entry excel_funcs_formcontrol[] = {
-	EXCEL_ME(FormControl, __construct, arginfo_FormControl___construct, 0)
+	EXCEL_ME(FormControl, __construct, arginfo_FormControl___construct, ZEND_ACC_PUBLIC)
 	EXCEL_ME(FormControl, objectType, arginfo_FormControl_void, 0)
 	EXCEL_ME(FormControl, checked, arginfo_FormControl_void, 0)
 	EXCEL_ME(FormControl, setChecked, arginfo_FormControl_setLong, 0)
@@ -9827,7 +9833,7 @@ const zend_function_entry excel_funcs_formcontrol[] = {
 };
 
 const zend_function_entry excel_funcs_conditionalformat[] = {
-	EXCEL_ME(ConditionalFormat, __construct, arginfo_ConditionalFormat___construct, 0)
+	EXCEL_ME(ConditionalFormat, __construct, arginfo_ConditionalFormat___construct, ZEND_ACC_PUBLIC)
 	EXCEL_ME(ConditionalFormat, font, arginfo_ConditionalFormat_void, 0)
 	EXCEL_ME(ConditionalFormat, numFormat, arginfo_ConditionalFormat_void, 0)
 	EXCEL_ME(ConditionalFormat, setNumFormat, arginfo_ConditionalFormat_setLong, 0)
@@ -9861,7 +9867,7 @@ const zend_function_entry excel_funcs_conditionalformat[] = {
 };
 
 const zend_function_entry excel_funcs_conditionalformatting[] = {
-	EXCEL_ME(ConditionalFormatting, __construct, arginfo_ConditionalFormatting___construct, 0)
+	EXCEL_ME(ConditionalFormatting, __construct, arginfo_ConditionalFormatting___construct, ZEND_ACC_PUBLIC)
 	EXCEL_ME(ConditionalFormatting, addRange, arginfo_ConditionalFormatting_addRange, 0)
 	EXCEL_ME(ConditionalFormatting, addRule, arginfo_ConditionalFormatting_addRule, 0)
 	EXCEL_ME(ConditionalFormatting, addTopRule, arginfo_ConditionalFormatting_addTopRule, 0)
@@ -9877,7 +9883,7 @@ const zend_function_entry excel_funcs_conditionalformatting[] = {
 };
 
 const zend_function_entry excel_funcs_coreproperties[] = {
-	EXCEL_ME(CoreProperties, __construct, arginfo_CoreProperties___construct, 0)
+	EXCEL_ME(CoreProperties, __construct, arginfo_CoreProperties___construct, ZEND_ACC_PUBLIC)
 	EXCEL_ME(CoreProperties, title, arginfo_CoreProperties_void, 0)
 	EXCEL_ME(CoreProperties, setTitle, arginfo_CoreProperties_setString, 0)
 	EXCEL_ME(CoreProperties, subject, arginfo_CoreProperties_void, 0)
@@ -9905,7 +9911,7 @@ const zend_function_entry excel_funcs_coreproperties[] = {
 };
 
 const zend_function_entry excel_funcs_table[] = {
-	EXCEL_ME(Table, __construct, arginfo_Table___construct, 0)
+	EXCEL_ME(Table, __construct, arginfo_Table___construct, ZEND_ACC_PUBLIC)
 	EXCEL_ME(Table, name, arginfo_Table_void, 0)
 	EXCEL_ME(Table, setName, arginfo_Table_setString, 0)
 	EXCEL_ME(Table, ref, arginfo_Table_void, 0)
