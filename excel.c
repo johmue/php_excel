@@ -1736,7 +1736,7 @@ EXCEL_METHOD(Book, getSheetName)
 		RETURN_FALSE;
 	}
 
-	if (index < 1) {
+	if (index < 0) {
 		RETURN_FALSE;
 	}
 
@@ -5180,7 +5180,10 @@ EXCEL_METHOD(Sheet, writeError)
 	}
 
 	SHEET_FROM_OBJECT(sheet, object);
-	FORMAT_FROM_OBJECT(format, oformat);
+
+	if (oformat) {
+		FORMAT_FROM_OBJECT(format, oformat);
+	}
 
 	xlSheetWriteError(sheet, row, col, iError, format);
 }
@@ -5252,7 +5255,7 @@ EXCEL_METHOD(AutoFilter, getRef)
 	add_assoc_long(return_value, "row_first", rowFirst);
 	add_assoc_long(return_value, "col_first", colFirst);
 	add_assoc_long(return_value, "row_last", rowLast);
-	add_assoc_long(return_value, "col_last", rowLast);
+	add_assoc_long(return_value, "col_last", colLast);
 }
 /* }}} */
 
@@ -5295,8 +5298,6 @@ EXCEL_METHOD(AutoFilter, column)
 	obj = Z_EXCEL_FILTERCOLUMN_OBJ_P(return_value);
 	obj->autofilter = autofilter;
 	obj->filtercolumn = fch;
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -5334,8 +5335,6 @@ EXCEL_METHOD(AutoFilter, columnByIndex)
 	obj = Z_EXCEL_FILTERCOLUMN_OBJ_P(return_value);
 	obj->autofilter = autofilter;
 	obj->filtercolumn = fch;
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -5357,7 +5356,7 @@ EXCEL_METHOD(AutoFilter, getSortRange)
 	add_assoc_long(return_value, "row_first", rowFirst);
 	add_assoc_long(return_value, "row_last", rowLast);
 	add_assoc_long(return_value, "col_first", colFirst);
-	add_assoc_long(return_value, "col_last", rowLast);
+	add_assoc_long(return_value, "col_last", colLast);
 }
 /* }}} */
 
@@ -7979,77 +7978,77 @@ EXCEL_METHOD(Table, setColumnName)
 	RETURN_BOOL(xlTableSetColumnName(table, index, ZSTR_VAL(name)));
 }
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_requiresKey, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_requiresKey, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_load, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_load, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_loadFile, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_loadFile, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_save, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_save, 0, 0, MAY_BE_STRING|MAY_BE_TRUE|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_getSheet, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Book_getSheet, 0, 0, ExcelSheet, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, sheet, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_getSheetByName, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Book_getSheetByName, 0, 1, ExcelSheet, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, case_insensitive, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_deleteSheet, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_deleteSheet, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, sheet, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_activeSheet, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_activeSheet, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, sheet, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_addSheet, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Book_addSheet, 0, 1, ExcelSheet, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_copySheet, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Book_copySheet, 0, 2, ExcelSheet, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, sheet_number, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_sheetCount, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_sheetCount, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_getError, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_getError, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_addFont, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Book_addFont, 0, 0, ExcelFont, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, font, ExcelFont, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_addFormat, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Book_addFormat, 0, 0, ExcelFormat, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, format, ExcelFormat, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_getAllFormats, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_getAllFormats, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_addCustomFormat, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_addCustomFormat, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_getCustomFormat, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_getCustomFormat, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_packDate, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_packDate, 0, 1, MAY_BE_DOUBLE|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_packDateValues, 0, 0, 6)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_packDateValues, 0, 6, MAY_BE_DOUBLE|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, year, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, month, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, day, IS_LONG, 0)
@@ -8058,20 +8057,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_packDateValues, 0, 0, 6)
 	ZEND_ARG_TYPE_INFO(0, sec, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_unpackDate, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_unpackDate, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, date, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_getActiveSheet, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_getActiveSheet, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_getDefaultFont, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_getDefaultFont, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_isDate1904, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_isDate1904, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_setDate1904, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_setDate1904, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, date_type, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
@@ -8090,32 +8089,32 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Book___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, excel_2007, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_setActiveSheet, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_setActiveSheet, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, sheet, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_addPictureFromFile, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_addPictureFromFile, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_addPictureFromString, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_addPictureFromString, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_rgbMode, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_rgbMode, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_setRGBMode, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, mode, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_colorPack, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_colorPack, 0, 3, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, r, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, g, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, b, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_colorUnpack, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_colorUnpack, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, color, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -8123,86 +8122,86 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_setRefR1C1, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, active, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_biffVersion, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_biffVersion, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_getRefR1C1, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_getRefR1C1, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_getPicture, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_getPicture, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_getNumPictures, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_getNumPictures, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_insertSheet, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Book_insertSheet, 0, 2, ExcelSheet, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO(0, sheet, ExcelSheet, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_isTemplate, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_isTemplate, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_setTemplate, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, mode, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getRightToLeft, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getRightToLeft, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setRightToLeft, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_sheetType, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_sheetType, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, sheet, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_getLibXlVersion, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_getLibXlVersion, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_getPhpExcelVersion, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_getPhpExcelVersion, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_loadInfo, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_loadInfo, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_getSheetName, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_getSheetName, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Font_size, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Font_size, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Font_italics, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Font_italics, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, size, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Font_strike, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Font_strike, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, strike, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Font_bold, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Font_bold, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, bold, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Font_color, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Font_color, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, color, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Font_mode, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Font_mode, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Font_underline, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Font_underline, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, underline_style, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Font_name, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Font_name, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -8214,106 +8213,106 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Font___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, book, ExcelBook, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_setFont, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Format_setFont, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, font, ExcelFont, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_getFont, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Format_getFont, 0, 0, ExcelFont, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_numberFormat, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_numberFormat, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_horizontalAlign, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_horizontalAlign, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, align_mode)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_verticalAlign, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_verticalAlign, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, align_mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_wrap, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Format_wrap, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, wrap, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_rotate, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_rotate, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, angle, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_indent, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_indent, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, indent, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_shrinkToFit, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Format_shrinkToFit, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, shrink)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_borderStyle, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Format_borderStyle, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, style)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_borderColor, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Format_borderColor, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_borderLeftStyle, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_borderLeftStyle, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, style)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_borderLeftColor, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_borderLeftColor, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_borderRightStyle, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_borderRightStyle, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, style)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_borderRightColor, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_borderRightColor, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_borderTopStyle, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_borderTopStyle, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, style)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_borderTopColor, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_borderTopColor, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_borderBottomStyle, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_borderBottomStyle, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, style)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_borderBottomColor, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_borderBottomColor, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_borderDiagonalStyle, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_borderDiagonalStyle, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, style)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_borderDiagonalColor, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_borderDiagonalColor, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_fillPattern, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_fillPattern, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, patern)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_patternForegroundColor, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_patternForegroundColor, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_patternBackgroundColor, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Format_patternBackgroundColor, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_locked, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Format_locked, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, locked)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Format_hidden, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Format_hidden, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, hidden)
 ZEND_END_ARG_INFO()
 
@@ -8322,12 +8321,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_cellType, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_cellType, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_cellFormat, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Sheet_cellFormat, 0, 2, ExcelFormat, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -8338,14 +8337,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setCellFormat, 0, 0, 3)
 	ZEND_ARG_OBJ_INFO(0, format, ExcelFormat, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_readRow, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_readRow, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, start_col, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, end_column, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, read_formula, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_readCol, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_readCol, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, start_row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, end_row, IS_LONG, 0)
@@ -8359,7 +8358,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_read, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, read_formula, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_write, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_write, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_MIXED, 1)
@@ -8367,14 +8366,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_write, 0, 0, 3)
 	ZEND_ARG_INFO(0, datatype)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_writeRow, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_writeRow, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, start_column, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, format, ExcelFormat, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_writeCol, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_writeCol, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, start_row, IS_LONG, 0)
@@ -8382,49 +8381,49 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_writeCol, 0, 0, 2)
 	ZEND_ARG_INFO(0, data_type)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_isFormula, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_isFormula, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_isDate, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_isDate, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_insertRow, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_insertRow, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, row_first)
 	ZEND_ARG_INFO(0, row_last)
 	ZEND_ARG_INFO(0, update_named_ranges)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_insertCol, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_insertCol, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, col_first, IS_LONG, 0)
 	ZEND_ARG_INFO(0, col_last)
 	ZEND_ARG_INFO(0, update_named_ranges)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_removeRow, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_removeRow, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row_first, IS_LONG, 0)
 	ZEND_ARG_INFO(0, row_last)
 	ZEND_ARG_INFO(0, update_named_ranges)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_removeCol, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_removeCol, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, col_first, IS_LONG, 0)
 	ZEND_ARG_INFO(0, col_last)
 	ZEND_ARG_INFO(0, update_named_ranges)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_colWidth, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_colWidth, 0, 1, MAY_BE_DOUBLE|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_rowHeight, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_rowHeight, 0, 1, MAY_BE_DOUBLE|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_readComment, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_readComment, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -8438,7 +8437,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_writeComment, 0, 0, 6)
 	ZEND_ARG_TYPE_INFO(0, height, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setColWidth, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setColWidth, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, column_start, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, column_end, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, width, IS_DOUBLE, 0)
@@ -8446,26 +8445,26 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setColWidth, 0, 0, 3)
 	ZEND_ARG_OBJ_INFO(0, format, ExcelFormat, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setRowHeight, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setRowHeight, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, height, IS_DOUBLE, 0)
 	ZEND_ARG_OBJ_INFO(0, format, ExcelFormat, 1)
 	ZEND_ARG_TYPE_INFO(0, hidden, IS_MIXED, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getMerge, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getMerge, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setMerge, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setMerge, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row_start, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, row_end, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col_start, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col_end, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_deleteMerge, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_deleteMerge, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -8491,12 +8490,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_addPictureDim, 0, 0, 5)
 	ZEND_ARG_TYPE_INFO(0, pos, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_horPageBreak, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_horPageBreak, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, break, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_verPageBreak, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_verPageBreak, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, break, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -8506,13 +8505,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_splitSheet, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_groupRows, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_groupRows, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, start_row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, end_row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, collapse, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_groupCols, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_groupCols, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, start_column, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, end_column, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, collapse, IS_LONG, 0)
@@ -8525,29 +8524,29 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_clear, 0, 0, 4)
 	ZEND_ARG_TYPE_INFO(0, col_e, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_copy, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_copy, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, to_row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, to_col, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_firstRow, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_firstRow, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_lastRow, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_lastRow, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_firstCol, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_firstCol, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_lastCol, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_lastCol, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_displayGridlines, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_displayGridlines, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_printGridlines, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_printGridlines, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setDisplayGridlines, 0, 0, 1)
@@ -8558,36 +8557,36 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setPrintGridlines, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_zoom, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_zoom, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_isHidden, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_isHidden, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setHidden, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setHidden, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, value, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getTopLeftView, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getTopLeftView, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setTopLeftView, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setTopLeftView, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_rowColToAddr, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_rowColToAddr, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, row_relative, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, col_relative, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_addrToRowCol, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_addrToRowCol, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, cell_reference, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_zoomPrint, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_zoomPrint, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setZoom, 0, 0, 1)
@@ -8602,42 +8601,42 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setLandscape, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_landscape, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_landscape, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_paper, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_paper, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setPaper, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_header, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_header, 0, 0, MAY_BE_STRING|MAY_BE_NULL|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_footer, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_footer, 0, 0, MAY_BE_STRING|MAY_BE_NULL|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setHeader, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setHeader, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, header)
 	ZEND_ARG_INFO(0, margin)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setFooter, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setFooter, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, footer)
 	ZEND_ARG_INFO(0, margin)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_headerMargin, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_headerMargin, 0, 0, MAY_BE_DOUBLE|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_footerMargin, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_footerMargin, 0, 0, MAY_BE_DOUBLE|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_hcenter, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_hcenter, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_vcenter, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_vcenter, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setHCenter, 0, 0, 1)
@@ -8648,16 +8647,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setVCenter, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_marginLeft, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_marginLeft, 0, 0, MAY_BE_DOUBLE|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_marginRight, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_marginRight, 0, 0, MAY_BE_DOUBLE|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_marginTop, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_marginTop, 0, 0, MAY_BE_DOUBLE|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_marginBottom, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_marginBottom, 0, 0, MAY_BE_DOUBLE|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setMarginLeft, 0, 0, 1)
@@ -8676,30 +8675,30 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setMarginBottom, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_printHeaders, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_printHeaders, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setPrintHeaders, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_name, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_name, 0, 0, MAY_BE_STRING|MAY_BE_NULL|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setName, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_protect, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_protect, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setProtect, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setProtect, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, value, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, enhancedProtection, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setNamedRange, 0, 0, 5)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setNamedRange, 0, 5, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
@@ -8708,102 +8707,102 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setNamedRange, 0, 0, 5)
 	ZEND_ARG_TYPE_INFO(0, scope_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_delNamedRange, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_delNamedRange, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, scope_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setPrintRepeatRows, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setPrintRepeatRows, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, row_start)
 	ZEND_ARG_INFO(0, row_end)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setPrintRepeatCols, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setPrintRepeatCols, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, col_start, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, col_end)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setPrintArea, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setPrintArea, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row_first, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, row_last, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col_first, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col_last, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_clearPrintRepeats, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_clearPrintRepeats, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_clearPrintArea, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_clearPrintArea, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getGroupSummaryRight, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_getGroupSummaryRight, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getGroupSummaryBelow, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_getGroupSummaryBelow, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setGroupSummaryBelow, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setGroupSummaryBelow, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, direction, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setGroupSummaryRight, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setGroupSummaryRight, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, direction, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setPrintFit, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setPrintFit, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, wPages, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, hPages, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getPrintFit, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getPrintFit, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getNamedRange, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getNamedRange, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, scope_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getIndexRange, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getIndexRange, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, scope_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_namedRangeSize, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_namedRangeSize, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getVerPageBreak, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getVerPageBreak, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getVerPageBreakSize, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getVerPageBreakSize, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getHorPageBreak, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getHorPageBreak, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getHorPageBreakSize, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getHorPageBreakSize, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getPictureInfo, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getPictureInfo, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getNumPictures, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getNumPictures, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_hyperlinkSize, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_hyperlinkSize, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_hyperlink, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_hyperlink, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_delHyperlink, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_delHyperlink, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_addHyperlink, 0, 0, 5)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_addHyperlink, 0, 5, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, hyperlink, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, row_first, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, row_last, IS_LONG, 0)
@@ -8811,66 +8810,66 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_addHyperlink, 0, 0, 5)
 	ZEND_ARG_TYPE_INFO(0, col_last, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_mergeSize, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_mergeSize, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_merge, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_merge, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_delMergeByIndex, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_delMergeByIndex, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_splitInfo, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_splitInfo, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_colHidden, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_colHidden, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_rowHidden, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_rowHidden, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setColHidden, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setColHidden, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, hidden, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setRowHidden, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setRowHidden, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, hidden, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_isLicensed, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_isLicensed, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setAutoFitArea, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setAutoFitArea, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row_start, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, row_end, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col_start, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col_end, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_printRepeatRows, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_printRepeatRows, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_printRepeatCols, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_printRepeatCols, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_printArea, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_printArea, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setTabColor, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setTabColor, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, color, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_table, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_table, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_addIgnoredError, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_addIgnoredError, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, iError, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, rowFirst, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, colFirst, IS_LONG, 0)
@@ -8890,20 +8889,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_writeError, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO(0, format, ExcelFormat, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_applyFilter, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_applyFilter, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_autoFilter, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Sheet_autoFilter, 0, 0, ExcelAutoFilter, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_removeFilter, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_removeFilter, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_AutoFilter___construct, 0, 0, 0)
 	ZEND_ARG_OBJ_INFO(0, sheet, ExcelSheet, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_AutoFilter_getRef, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_AutoFilter_getRef, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_AutoFilter_setRef, 0, 0, 0)
@@ -8913,62 +8912,63 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_AutoFilter_setRef, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, col_last, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_AutoFilter_column, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_AutoFilter_column, 0, 1, ExcelFilterColumn, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, colId, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_AutoFilter_columnSize, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_AutoFilter_columnSize, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_AutoFilter_columnByIndex, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_AutoFilter_columnByIndex, 0, 1, ExcelFilterColumn, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_AutoFilter_getSortRange, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_AutoFilter_getSortRange, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_AutoFilter_getSort, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_AutoFilter_getSort, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_AutoFilter_setSort, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_AutoFilter_setSort, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, columnIndex, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, descending, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FilterColumn___construct, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, autoFilter, AutoFilter, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_FilterColumn___construct, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, autoFilter, ExcelAutoFilter, 0)
+	ZEND_ARG_TYPE_INFO(0, colId, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FilterColumn_index, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_FilterColumn_index, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FilterColumn_filterType, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_FilterColumn_filterType, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FilterColumn_filterSize, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_FilterColumn_filterSize, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FilterColumn_filter, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_FilterColumn_filter, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FilterColumn_addFilter, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_FilterColumn_addFilter, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filterValue, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FilterColumn_getTop10, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_FilterColumn_getTop10, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FilterColumn_setTop10, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_FilterColumn_setTop10, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, top, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, percent, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FilterColumn_getCustomFilter, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_FilterColumn_getCustomFilter, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FilterColumn_setCustomFilter, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_FilterColumn_setCustomFilter, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, operator_1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value_1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, operator_2, IS_LONG, 0)
@@ -8976,20 +8976,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_FilterColumn_setCustomFilter, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, andOp, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FilterColumn_clear, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_FilterColumn_clear, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_addPictureAsLink, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_addPictureAsLink, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, insert, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_moveSheet, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_moveSheet, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, src_index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, dest_index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_addDataValidation, 0, 0, 7)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_addDataValidation, 0, 7, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, op, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, row_first, IS_LONG, 0)
@@ -9009,7 +9009,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_addDataValidation, 0, 0, 7)
 	ZEND_ARG_TYPE_INFO(0, error_style, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_addDataValidationDouble, 0, 0, 7)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_addDataValidationDouble, 0, 7, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, op, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, row_first, IS_LONG, 0)
@@ -9029,144 +9029,144 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_addDataValidationDouble, 0, 0, 7)
 	ZEND_ARG_TYPE_INFO(0, error_style, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_removeDataValidations, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_removeDataValidations, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 /* New Book method arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_addRichString, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Book_addRichString, 0, 0, ExcelRichString, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_calcMode, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_calcMode, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_setCalcMode, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_setCalcMode, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_addConditionalFormat, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Book_addConditionalFormat, 0, 0, ExcelConditionalFormat, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_addFormatFromStyle, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Book_addFormatFromStyle, 0, 1, ExcelFormat, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, style, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_removeVBA, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_removeVBA, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_removePrinterSettings, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_removePrinterSettings, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_dpiAwareness, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Book_dpiAwareness, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_setDpiAwareness, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_setDpiAwareness, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_coreProperties, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Book_coreProperties, 0, 0, ExcelCoreProperties, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Book_removeAllPhonetics, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Book_removeAllPhonetics, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 /* New Sheet method arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_firstFilledRow, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_firstFilledRow, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_lastFilledRow, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_lastFilledRow, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_firstFilledCol, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_firstFilledCol, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_lastFilledCol, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_lastFilledCol, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_removePicture, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_removePicture, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_removePictureByIndex, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_removePictureByIndex, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_isRichStr, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_isRichStr, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_readRichStr, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Sheet_readRichStr, 0, 2, ExcelRichString, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_writeRichStr, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_writeRichStr, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, richString, ExcelRichString, 0)
 	ZEND_ARG_OBJ_INFO(0, format, ExcelFormat, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_formControlSize, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_formControlSize, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_formControl, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Sheet_formControl, 0, 1, ExcelFormControl, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getActiveCell, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getActiveCell, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setActiveCell, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setActiveCell, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_selectionRange, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_selectionRange, 0, 0, MAY_BE_STRING|MAY_BE_NULL|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_addSelectionRange, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_addSelectionRange, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, sqref, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_removeSelection, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_removeSelection, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_tabColor, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_tabColor, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getTabRgbColor, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getTabRgbColor, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setTabRgbColor, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setTabRgbColor, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, red, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, green, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, blue, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_hyperlinkIndex, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_hyperlinkIndex, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_colWidthPx, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_colWidthPx, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_rowHeightPx, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_rowHeightPx, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_colFormat, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Sheet_colFormat, 0, 1, ExcelFormat, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_rowFormat, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Sheet_rowFormat, 0, 1, ExcelFormat, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setColPx, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setColPx, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, colFirst, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, colLast, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, widthPx, IS_LONG, 0)
@@ -9174,14 +9174,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setColPx, 0, 0, 3)
 	ZEND_ARG_INFO(0, hidden)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setRowPx, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setRowPx, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, heightPx, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, format, ExcelFormat, 1)
 	ZEND_ARG_INFO(0, hidden)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setBorder, 0, 0, 6)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_setBorder, 0, 6, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, rowFirst, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, rowLast, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, colFirst, IS_LONG, 0)
@@ -9190,7 +9190,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_setBorder, 0, 0, 6)
 	ZEND_ARG_TYPE_INFO(0, borderColor, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_addTable, 0, 0, 5)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Sheet_addTable, 0, 5, ExcelTable, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, rowFirst, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, rowLast, IS_LONG, 0)
@@ -9200,38 +9200,38 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_addTable, 0, 0, 5)
 	ZEND_ARG_TYPE_INFO(0, style, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getTableByName, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Sheet_getTableByName, 0, 1, ExcelTable, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_getTableByIndex, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Sheet_getTableByIndex, 0, 1, ExcelTable, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_applyFilter2, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_applyFilter2, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, autoFilter, ExcelAutoFilter, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_addConditionalFormatting, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Sheet_addConditionalFormatting, 0, 4, ExcelConditionalFormatting, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, rowFirst, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, rowLast, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, colFirst, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, colLast, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_conditionalFormatting, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_Sheet_conditionalFormatting, 0, 1, ExcelConditionalFormatting, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_removeConditionalFormatting, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Sheet_removeConditionalFormatting, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_conditionalFormattingSize, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_conditionalFormattingSize, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 /* AutoFilter addSort arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_AutoFilter_addSort, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_AutoFilter_addSort, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, columnIndex, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, descending, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -9241,20 +9241,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_RichString___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, book, ExcelBook, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_RichString_addFont, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_RichString_addFont, 0, 0, ExcelFont, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, font, ExcelFont, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_RichString_addText, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_RichString_addText, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO(0, font, ExcelFont, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_RichString_getText, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_RichString_getText, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_RichString_textSize, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_RichString_textSize, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 /* FormControl arginfo */
@@ -9266,23 +9266,23 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_FormControl_void, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FormControl_setLong, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_FormControl_setLong, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FormControl_setString, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_FormControl_setString, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FormControl_setBool, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_FormControl_setBool, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FormControl_item, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_FormControl_item, 0, 1, MAY_BE_STRING|MAY_BE_NULL|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_FormControl_insertItem, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_FormControl_insertItem, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -9295,11 +9295,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormat_void, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormat_setLong, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormat_setLong, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormat_setString, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormat_setString, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
@@ -9312,21 +9312,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting___construct, 0, 0, 5)
 	ZEND_ARG_TYPE_INFO(0, colLast, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_addRange, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormatting_addRange, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, rowFirst, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, rowLast, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, colFirst, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, colLast, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_addRule, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormatting_addRule, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, cf, ExcelConditionalFormat, 0)
 	ZEND_ARG_INFO(0, value)
 	ZEND_ARG_TYPE_INFO(0, stopIfTrue, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_addTopRule, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormatting_addTopRule, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, cf, ExcelConditionalFormat, 0)
 	ZEND_ARG_INFO(0, value)
 	ZEND_ARG_TYPE_INFO(0, bottom, IS_LONG, 0)
@@ -9334,7 +9334,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_addTopRule, 0, 0, 4)
 	ZEND_ARG_TYPE_INFO(0, stopIfTrue, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_addOpNumRule, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormatting_addOpNumRule, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, op, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, cf, ExcelConditionalFormat, 0)
 	ZEND_ARG_INFO(0, value1)
@@ -9342,7 +9342,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_addOpNumRule, 0, 0, 4)
 	ZEND_ARG_TYPE_INFO(0, stopIfTrue, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_addOpStrRule, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormatting_addOpStrRule, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, op, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, cf, ExcelConditionalFormat, 0)
 	ZEND_ARG_INFO(0, value1)
@@ -9350,7 +9350,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_addOpStrRule, 0, 0, 4)
 	ZEND_ARG_TYPE_INFO(0, stopIfTrue, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_addAboveAverageRule, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormatting_addAboveAverageRule, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, cf, ExcelConditionalFormat, 0)
 	ZEND_ARG_INFO(0, above)
 	ZEND_ARG_TYPE_INFO(0, equal, _IS_BOOL, 0)
@@ -9358,13 +9358,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_addAboveAverageRule, 0, 0, 
 	ZEND_ARG_TYPE_INFO(0, stopIfTrue, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_addTimePeriodRule, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormatting_addTimePeriodRule, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, cf, ExcelConditionalFormat, 0)
 	ZEND_ARG_INFO(0, timePeriod)
 	ZEND_ARG_TYPE_INFO(0, stopIfTrue, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_add2ColorScaleRule, 0, 0, 6)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormatting_add2ColorScaleRule, 0, 6, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, minColor, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, maxColor, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, minType, IS_LONG, 0)
@@ -9374,7 +9374,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_add2ColorScaleRule, 0, 0, 6
 	ZEND_ARG_TYPE_INFO(0, stopIfTrue, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_add2ColorScaleFormulaRule, 0, 0, 6)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormatting_add2ColorScaleFormulaRule, 0, 6, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, minColor, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, maxColor, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, minType, IS_LONG, 0)
@@ -9384,7 +9384,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_add2ColorScaleFormulaRule, 
 	ZEND_ARG_TYPE_INFO(0, stopIfTrue, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_add3ColorScaleRule, 0, 0, 9)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormatting_add3ColorScaleRule, 0, 9, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, minColor, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, midColor, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, maxColor, IS_LONG, 0)
@@ -9397,7 +9397,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_add3ColorScaleRule, 0, 0, 9
 	ZEND_ARG_TYPE_INFO(0, stopIfTrue, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ConditionalFormatting_add3ColorScaleFormulaRule, 0, 0, 9)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ConditionalFormatting_add3ColorScaleFormulaRule, 0, 9, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, minColor, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, midColor, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, maxColor, IS_LONG, 0)
@@ -9418,11 +9418,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_CoreProperties_void, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_CoreProperties_setString, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_CoreProperties_setString, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_CoreProperties_setDouble, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_CoreProperties_setDouble, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
@@ -9441,23 +9441,23 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_Table_void, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Table_setString, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Table_setString, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Table_setLong, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Table_setLong, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Table_setBool, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Table_setBool, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Table_columnName, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Table_columnName, 0, 1, MAY_BE_STRING|MAY_BE_NULL|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_Table_setColumnName, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Table_setColumnName, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
