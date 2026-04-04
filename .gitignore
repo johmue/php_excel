@@ -67,3 +67,4 @@ tmp-php.ini
 CLAUDE.md
 libxl/*
 libxl-lin-5.1.0.tar.gz
+.env
