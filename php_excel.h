@@ -34,9 +34,6 @@ ZEND_END_MODULE_GLOBALS(excel)
 #define PHP_EXCEL_API
 #endif
 
-#define PHP_EXCEL_ERROR_HANDLING() \
-	zend_error_handling error_handling; \
-	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-#define PHP_EXCEL_RESTORE_ERRORS() zend_restore_error_handling(&error_handling);
+/* Removed: PHP_EXCEL_ERROR_HANDLING / PHP_EXCEL_RESTORE_ERRORS -- dead code since PHP 8.0 */
 
 #endif	/* PHP_EXCEL_H */
