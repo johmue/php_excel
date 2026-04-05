@@ -6,12 +6,9 @@ on:
   pull_request:
     branches: [master]
 
-env:
-  LIBXL_VERSION: "5.1.0"
-
 jobs:
   linux:
-    name: PHP ${{ matrix.php }} - ${{ matrix.libxl }}
+    name: PHP ${{ matrix.php }} - libxl ${{ matrix.libxl }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -36,14 +33,18 @@ jobs:
         uses: actions/cache@v4
         with:
           path: libxl-${{ matrix.libxl }}
-          key: libxl-lin-${{ matrix.libxl }}
+          key: libxl-lin-${{ matrix.libxl }}-v1
 
       - name: Download LibXL
         if: steps.cache-libxl.outputs.cache-hit != 'true'
         run: |
           curl -fsSL "https://www.libxl.com/download/libxl-lin-${{ matrix.libxl }}.tar.gz" -o libxl.tar.gz
           tar xzf libxl.tar.gz
-          mv libxl-${{ matrix.libxl }}.0 libxl-${{ matrix.libxl }} || true
+          # tarball extracts as libxl-X.Y.Z.0, normalize to libxl-X.Y.Z
+          extracted=$(ls -d libxl-* | grep -v tar | head -1)
+          if [ "$extracted" != "libxl-${{ matrix.libxl }}" ]; then
+            mv "$extracted" "libxl-${{ matrix.libxl }}"
+          fi
           ls libxl-${{ matrix.libxl }}/include_c/libxl.h
 
       - name: Build extension
@@ -53,23 +54,20 @@ jobs:
             --with-excel \
             --with-libxl-incdir=${{ github.workspace }}/libxl-${{ matrix.libxl }}/include_c \
             --with-libxl-libdir=${{ github.workspace }}/libxl-${{ matrix.libxl }}/lib64
-          make -j$(nproc)
-
-      - name: Verify zero warnings
-        run: |
-          make clean
-          WARNINGS=$(make -j$(nproc) 2>&1 | grep -c 'warning:' || true)
+          WARNINGS=$(make -j$(nproc) 2>&1 | tee /dev/stderr | grep -c 'warning:' || true)
           if [ "$WARNINGS" -gt 0 ]; then
             echo "::error::Build produced $WARNINGS warning(s)"
-            make -j$(nproc) 2>&1 | grep 'warning:'
             exit 1
           fi
 
       - name: Run tests
         if: matrix.libxl == '5.1.0'
+        env:
+          LD_LIBRARY_PATH: ${{ github.workspace }}/libxl-${{ matrix.libxl }}/lib64
+          TEST_PHP_EXECUTABLE: ${{ github.workspace }}/../../.phpenv/shims/php
+          NO_INTERACTION: 1
+          REPORT_EXIT_STATUS: 1
         run: |
-          export LD_LIBRARY_PATH="${{ github.workspace }}/libxl-${{ matrix.libxl }}/lib64"
           export TEST_PHP_EXECUTABLE=$(which php)
           export TEST_PHP_ARGS="-d extension=$(pwd)/modules/excel.so"
-          export NO_INTERACTION=1
           php run-tests.php --show-diff tests/

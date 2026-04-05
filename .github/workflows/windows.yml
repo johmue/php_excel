@@ -7,6 +7,9 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  LIBXL_VERSION: "5.1.0"
+
 jobs:
   windows-matrix:
     name: Generate Windows build matrix
@@ -18,7 +21,7 @@ jobs:
         uses: php/php-windows-builder/extension-matrix@v1
         with:
           extension-url: ${{ github.event.repository.html_url }}
-          php-version-list: '8.3, 8.4, 8.5'
+          php-version-list: '8.3, 8.4'
 
   windows-build:
     name: Build ${{ matrix.php-version }} ${{ matrix.arch }} ${{ matrix.ts }}
@@ -30,16 +33,43 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache LibXL
+        id: cache-libxl
+        uses: actions/cache@v4
+        with:
+          path: deps
+          key: libxl-win-${{ env.LIBXL_VERSION }}
+
+      - name: Download LibXL
+        if: steps.cache-libxl.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://www.libxl.com/download/libxl-win-${{ env.LIBXL_VERSION }}.zip" -OutFile libxl.zip
+          Expand-Archive libxl.zip -DestinationPath libxl-extract
+          $dir = Get-ChildItem -Path libxl-extract -Directory | Select-Object -First 1
+          New-Item -ItemType Directory -Path deps -Force
+          Copy-Item -Path "$($dir.FullName)\include_c\*" -Destination deps\ -Recurse -Force
+          Copy-Item -Path "$($dir.FullName)\lib64\*" -Destination deps\ -Recurse -Force
+          Copy-Item -Path "$($dir.FullName)\bin64\*" -Destination deps\ -Recurse -Force
+
+      - name: Prepare deps directory
+        shell: pwsh
+        run: |
+          # Ensure deps has the layout php-windows-builder expects
+          if (-not (Test-Path deps\libxl.h)) {
+            Write-Error "deps directory missing libxl.h"
+            exit 1
+          }
+          Get-ChildItem deps\
+
       - name: Build extension
         uses: php/php-windows-builder/extension@v1
         with:
           php-version: ${{ matrix.php-version }}
           ts: ${{ matrix.ts }}
           arch: ${{ matrix.arch }}
-          args: --with-excel --with-libxl=${{ github.workspace }}\libxl
-          libs: libxl
-        env:
-          LIBXL_URL: https://www.libxl.com/download/libxl-win-5.1.0.zip
+          args: --with-excel --with-libxl=deps
+          deps-path: deps
 
   release:
     name: Attach Windows DLLs to release
