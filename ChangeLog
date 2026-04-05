@@ -1,4 +1,71 @@
-[2016-??-??] - Version 1.0.3dev
+[????-??-??] - Version 2.0.0dev
+	* Added PHP 8.3, 8.4, 8.5 and master support
+	* Minimum PHP version is now 8.3
+	* Minimum LibXL version is now 4.6.0
+	* Added PIE (PHP Installer for Extensions) support via composer.json
+	* Fixed crash when trying to read an empty file (from unreleased 1.0.3)
+	* Fixed bug with writing references (see issue #234, from unreleased 1.0.3)
+	* Fixed memory leaks in setProtect(), addDataValidation(), addDataValidationDouble()
+	* Fixed use-after-free when parent object is GC'd before child
+	* Fixed memory corruption in getIndexRange() on 64-bit (int/zend_long aliasing)
+	* Fixed NULL pointer dereferences in FilterColumn::filter(), getCustomFilter(),
+	  addPicture(), Sheet::writeError()
+	* Fixed Sheet::autoFilter() returning true instead of ExcelAutoFilter object
+	* Fixed AutoFilter::column()/columnByIndex() returning true instead of FilterColumn
+	* Fixed AutoFilter::getRef()/getSortRange() writing wrong value to col_last key
+	* Fixed FilterColumn::__construct() arginfo/parameter mismatch
+	* Fixed Book::getSheetName() rejecting 0-based index
+	* Fixed Sheet::cellFormat() not setting book handle on returned format
+	* Fixed constructors returning false on error (now throw exceptions)
+	* Replaced all zend_bool with bool, long with zend_long
+	* Replaced getThis() with ZEND_THIS, ZEND_NUM_ARGS() checks with
+	  ZEND_PARSE_PARAMETERS_NONE()
+	* All classes marked ZEND_ACC_NOT_SERIALIZABLE
+	* Added typed parameter arginfo (399 parameters) and return type arginfo
+	  (277 methods)
+	* Added new classes:
+		- ExcelRichString (rich text with mixed fonts in a single cell)
+		- ExcelFormControl (checkboxes, dropdowns, buttons, spinners, etc.)
+		- ExcelConditionalFormat (conditional formatting style rules)
+		- ExcelConditionalFormatting (conditional formatting ranges and rules)
+		- ExcelCoreProperties (workbook metadata: title, author, dates, etc.)
+		- ExcelTable (structured table support for xlsx)
+	* Added new ExcelBook methods:
+		- addRichString(), calcMode(), setCalcMode()
+		- addConditionalFormat(), addFormatFromStyle()
+		- removeVBA(), removePrinterSettings()
+		- dpiAwareness(), setDpiAwareness()
+		- coreProperties(), removeAllPhonetics()
+		- getLibXlVersion(), getPhpExcelVersion()
+		- addPictureAsLink(), moveSheet()
+	* Added new ExcelBook methods (requires LibXL 5.0.0+):
+		- setPassword(), dpiAwareness(), setDpiAwareness()
+	* Added new ExcelBook methods (requires LibXL 5.0.1+):
+		- loadInfoRaw()
+	* Added new ExcelBook methods (requires LibXL 5.1.0+):
+		- errorCode(), conditionalFormat(), conditionalFormatSize(), clear()
+	* Added new ExcelSheet methods:
+		- firstFilledRow(), lastFilledRow(), firstFilledCol(), lastFilledCol()
+		- removePicture(), removePictureByIndex()
+		- isRichStr(), readRichStr(), writeRichStr()
+		- formControlSize(), formControl()
+		- getActiveCell(), setActiveCell()
+		- selectionRange(), addSelectionRange(), removeSelection()
+		- tabColor(), getTabRgbColor(), setTabRgbColor()
+		- hyperlinkIndex()
+		- colWidthPx(), rowHeightPx(), colFormat(), rowFormat()
+		- setColPx(), setRowPx(), setBorder()
+		- addTable(), getTableByName(), getTableByIndex()
+		- applyFilter2()
+		- addConditionalFormatting()
+		- addDataValidation(), addDataValidationDouble(), removeDataValidations()
+	* Added new ExcelSheet methods (requires LibXL 5.1.0+):
+		- conditionalFormatting(), removeConditionalFormatting()
+		- conditionalFormattingSize()
+	* Added ExcelAutoFilter::addSort()
+	* Added ExcelSheet::AS_STRING const (from unreleased 1.0.3, PR 183 by ederuiter)
+	* Added constants for CalcMode, CellStyle, TableStyle, FormControl types,
+	  ConditionalFormat types/operators/time periods, and CFVOType
 
 [2016-06-23] - Version 1.0.2
 	* Fixed bug in ExcelSheet::addPictureDim() (see issue #120)
@@ -10,6 +77,8 @@
 		- ExcelBook::printRepeatRows()
 	* Added support for LibXL 3.6.3
 	* ExcelSheet::addPictureDim() & ExcelSheet::addPictureScaled() now support position parameters
+	* Includes official PHP7 release
+	* Added support for libxl compiled from source
 
 [2015-02-26] - Version 1.0.1
 	* Added methods

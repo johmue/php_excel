@@ -12,20 +12,20 @@ date.timezone=America/Toronto
 
 	$data = array(true, 1.222, 434324, "fsdfasDF", NULL, "", false, -3321, -77.3321, "a a a a a aa");
 
-	var_dump($s->writeCol(0, $data));
-	var_dump($s->writeCol(1, $data, 5));
+	var_dump($s->writeCol(0, $data, 1));
+	var_dump($s->writeCol(1, $data, 6));
 
 	$format = $x->addFormat();
 	$format->borderStyle(ExcelFormat::BORDERSTYLE_THIN);
 
-	var_dump($s->writeCol(2, $data, 0, $format));
+	var_dump($s->writeCol(2, $data, 1, $format));
 
 	var_dump($s->writeCol(-1, $data));
 	var_dump($s->writeCol(1, $data, -1));
 
-	var_dump($s->readCol(0));
-	var_dump($s->readCol(1));
-	var_dump($s->readCol(2));
+	var_dump($s->readCol(0, 1));
+	var_dump($s->readCol(1, 1));
+	var_dump($s->readCol(2, 1));
 
 	echo "OK\n";
 ?>

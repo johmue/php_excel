@@ -64,4 +64,8 @@ tests/*/*/*.diff
 tests/*/*/*.php
 tests/*/*/*.exp
 tmp-php.ini
-libxl/*
+CLAUDE.md
+.env
+.claude/
+configure.ac
+excel.dep

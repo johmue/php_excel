@@ -11,19 +11,19 @@ date.timezone=America/Toronto
 	$s = $x->addSheet("Sheet 1");
 
 	for ($i = 0; $i < 10; $i++) {
-		for ($j = 0; $j < 10; $j++) {
+		for ($j = 1; $j < 11; $j++) {
 			$s->write($j, $i, "{$j} {$i}");
 		}
 	}
 
-	var_dump($s->insertRow(2,2), $x->getError());
-	var_dump($s->insertRow(5,7), $x->getError());
+	var_dump($s->insertRow(3,3), $x->getError());
+	var_dump($s->insertRow(6,8), $x->getError());
 
 	var_dump($s->insertCol(4,4), $x->getError());
 	var_dump($s->insertCol(6,9), $x->getError());
 
-	var_dump($s->removeRow(6,6), $x->getError());
-	var_dump($s->removeRow(6,7), $x->getError());
+	var_dump($s->removeRow(7,7), $x->getError());
+	var_dump($s->removeRow(7,8), $x->getError());
 
 	var_dump($s->removeCol(7,7), $x->getError());
 	var_dump($s->removeCol(7,8), $x->getError());

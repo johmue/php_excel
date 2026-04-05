@@ -5,22 +5,23 @@ date.timezone=America/Toronto
 --SKIPIF--
 <?php if (!extension_loaded("excel")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 	$x = new ExcelBook();
 
 	try {
 		$format = new ExcelFont();
-	} catch (Exception $e) {
-		var_dump($e->getMessage());
+	} catch (\Throwable $e) {
+		echo get_class($e) . "\n";
 	}
 
 	try {
 		$format = new ExcelFont('cdsd');
-	} catch (Exception $e) {
-		var_dump($e->getMessage());
+	} catch (\Throwable $e) {
+		echo get_class($e) . "\n";
 	}
+	echo "OK\n";
 ?>
---EXPECTF--
-string(61) "ExcelFont::__construct() expects exactly 1 parameter, 0 given"
-
-Catchable fatal error: Argument 1 passed to ExcelFont::__construct() must be an instance of ExcelBook, string given in %s on line %d
+--EXPECT--
+ArgumentCountError
+TypeError
+OK

@@ -13,18 +13,24 @@ date.timezone=America/Toronto
 	$data = "Test";
 	$oClass = new ReflectionClass('ExcelFormat');
 
-	$row = $col = 0;
+	$row = 1; $col = 0;
 
 	foreach ($oClass->getConstants() as $c => $style) {
 		if (strpos($c, 'BORDERSTYLE_') !== 0) {
 			continue;
 		}
-		
+
 		foreach ($oClass->getConstants() as $c2 => $color) {
 			if (strpos($c2, 'COLOR_') !== 0) {
 				continue;
 			}
-			
+
+			if ($row > 200) {
+				$x = new ExcelBook();
+				$s = $x->addSheet("Sheet 1");
+				$row = 1;
+			}
+
 			$format = $x->addFormat();
 			$format->borderDiagonalStyle($style);
 			$format->borderDiagonalColor($color);
@@ -36,7 +42,7 @@ date.timezone=America/Toronto
 			$s->read($row, 1, $fmt);
 			echo $fmt->borderDiagonalStyle() . " - " . $fmt->borderDiagonalColor() . "\n";
 
-			$row++;	
+			$row++;
 		}
 	}
 

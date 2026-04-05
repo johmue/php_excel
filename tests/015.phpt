@@ -13,7 +13,7 @@ date.timezone=America/Toronto
 	$data = "Test";
 	$oClass = new ReflectionClass('ExcelFormat');
 
-	$row = $col = 0;
+	$row = 1; $col = 0;
 
 	foreach ($oClass->getConstants() as $c => $color) {
 		if (strpos($c, 'COLOR_') !== 0) {
@@ -24,7 +24,13 @@ date.timezone=America/Toronto
 			if (strpos($c, 'FILLPATTERN_') !== 0) {
 				continue;
 			}
-			
+
+			if ($row > 100) {
+				$x = new ExcelBook();
+				$s = $x->addSheet("Sheet 1");
+				$row = 1;
+			}
+
 			$format = $x->addFormat();
 			$format->fillPattern($val);
 			$format->patternBackgroundColor($color);
@@ -47,7 +53,7 @@ date.timezone=America/Toronto
 			$s->read($row, 2, $fmt);
 			echo $fmt->fillPattern() . " - " . $format->patternForegroundColor() . "\n";
 
-			$row++;	
+			$row++;
 		}
 	}
 

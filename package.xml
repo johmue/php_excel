@@ -140,6 +140,9 @@ Numbers, etc...
 		<file name="086.phpt" role="test" />
 		<file name="087.phpt" role="test" />
 		<file name="088.phpt" role="test" />
+		<file name="089.phpt" role="test" />
+		<file name="090.phpt" role="test" />
+		<file name="091.phpt" role="test" />
 		<file name="dateunpack_overflow_bug.phpt" role="test" />
 		<file name="number_format_bug.phpt" role="test" />
 		<file name="write_read_row_bug.phpt" role="test" />
@@ -149,7 +152,7 @@ Numbers, etc...
   <dependencies>
     <required>
       <php>
-        <min>5.2.0</min>
+        <min>7.0.0</min>
       </php>
       <pearinstaller>
         <min>1.4.0b1</min>

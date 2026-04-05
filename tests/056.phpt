@@ -4,7 +4,7 @@ Excel 2007/2010 read/write tests
 <?php if (!extension_loaded("excel")) print "skip"; ?>
 --FILE--
 <?php 
-	$x = new ExcelBook(null,null,1);
+	$x = new ExcelBook(null, null, 1);
 
 	$data = array(true, 1.222, 434324, "fsdfasDF", NULL, "");
 
@@ -34,7 +34,7 @@ float(434324)
 string(6) "string"
 string(8) "fsdfasDF"
 string(4) "NULL"
-NULL
+string(0) ""
 string(6) "string"
 string(0) ""
 OK

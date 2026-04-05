@@ -1,0 +1,38 @@
+{
+    "name": "iliaal/php-excel",
+    "type": "php-ext",
+    "description": "PHP extension for reading and writing Excel files using LibXL",
+    "license": "PHP-3.01",
+    "homepage": "https://github.com/iliaal/php_excel",
+    "authors": [
+        {
+            "name": "Ilia Alshanetsky",
+            "email": "ilia@ilia.ws"
+        }
+    ],
+    "require": {
+        "php": ">=8.3"
+    },
+    "php-ext": {
+        "extension-name": "excel",
+        "configure-options": [
+            {
+                "name": "with-excel",
+                "description": "Enable Excel support",
+                "needs-value": false
+            },
+            {
+                "name": "with-libxl-incdir",
+                "description": "Path to LibXL C header files (include_c directory)",
+                "needs-value": true
+            },
+            {
+                "name": "with-libxl-libdir",
+                "description": "Path to LibXL shared library (lib64 directory)",
+                "needs-value": true
+            }
+        ],
+        "support-zts": true,
+        "support-nts": true
+    }
+}

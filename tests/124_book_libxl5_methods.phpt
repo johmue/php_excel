@@ -1,0 +1,52 @@
+--TEST--
+Book: setPassword, dpiAwareness, loadInfoRaw, errorCode, conditionalFormatSize, clear (libxl 5.x)
+--SKIPIF--
+<?php if (!extension_loaded("excel") || !method_exists('ExcelBook', 'setPassword')) print "skip"; ?>
+--FILE--
+<?php
+$book = new ExcelBook(null, null, true);
+$sheet = $book->addSheet("Test");
+$sheet->write(1, 0, "data");
+
+// setPassword
+$book->setPassword("secret");
+echo "setPassword: OK\n";
+
+// dpiAwareness / setDpiAwareness
+$orig = $book->dpiAwareness();
+var_dump(is_int($orig));
+$book->setDpiAwareness(1);
+var_dump($book->dpiAwareness());
+
+// save and loadInfoRaw
+$tmp = tempnam("/tmp", "xl") . ".xlsx";
+$book->save($tmp);
+$raw = file_get_contents($tmp);
+
+$book2 = new ExcelBook(null, null, true);
+var_dump($book2->loadInfoRaw($raw));
+var_dump($book2->sheetCount());
+
+// errorCode
+var_dump($book->errorCode());
+
+// conditionalFormatSize
+var_dump($book->conditionalFormatSize());
+
+// clear
+$book->clear();
+var_dump($book->sheetCount());
+
+unlink($tmp);
+echo "OK\n";
+?>
+--EXPECT--
+setPassword: OK
+bool(true)
+int(1)
+bool(true)
+int(1)
+int(0)
+int(0)
+int(0)
+OK

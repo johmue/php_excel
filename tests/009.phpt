@@ -12,15 +12,15 @@ date.timezone=America/Toronto
 
 	$data = "Test";
 
-	for ($i = 0; $i < 181; $i++) {
+	for ($i = 1; $i < 182; $i++) {
 		$format = $x->addFormat();
-		$format->rotate($i);
+		$format->rotate($i - 1);
 
 		var_dump($s->write($i, 0, $data, $format));
 		var_dump($x->getError());
 	}
 
-	for($i = 0; $i < 181; $i++) {
+	for($i = 1; $i < 182; $i++) {
 		$format = '';
 		$s->read($i, 0, $format);
 		echo (int)$format->rotate() . "\n";

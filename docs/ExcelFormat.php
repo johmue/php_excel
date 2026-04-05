@@ -14,6 +14,10 @@
 */
 class ExcelFormat
 {
+	const AS_DATE = 1;
+	const AS_FORMULA = 2;
+	const AS_NUMERIC_STRING = 3;
+
 	const COLOR_BLACK = 8;
 	const COLOR_WHITE = 9;
 	const COLOR_RED = 10;
@@ -72,10 +76,6 @@ class ExcelFormat
 	const COLOR_GRAY80 = 63;
 	const COLOR_DEFAULT_FOREGROUND = 64;
 	const COLOR_DEFAULT_BACKGROUND = 65;
-
-	const AS_DATE = 1;
-	const AS_FORMULA = 2;
-	const AS_NUMERIC_STRING = 3;
 
 	const NUMFORMAT_GENERAL = 0;
 	const NUMFORMAT_NUMBER = 1;
@@ -168,237 +168,26 @@ class ExcelFormat
 	const FILLPATTERN_THINDIAGCROSSHATCH = 16;
 	const FILLPATTERN_GRAY12P5 = 17;
 	const FILLPATTERN_GRAY6P25 = 18;
+
 	/**
 	* Create a format within an Excel workbook
 	*
 	* @see ExcelBook::addFormat()
 	* @param ExcelBook $book
-	* @return ExcelFormat
 	*/
 	public function __construct(ExcelBook $book)
 	{
-	} // __construct
-
-	/**
-	* Get, or set the color of the bottom border of a cell
-	*
-	* @param int $color (optional, default=null) One of ExcelFormat::COLOR_* constants
-	* @return int
-	*/
-	public function borderBottomColor($color = null)
-	{
-	} // borderBottomColor
-
-	/**
-	* Get, or set the border style for the bottom of a cell
-	*
-	* @param int $style (optional, default=null) One of ExcelFormat::BORDERSTYLE_* constants
-	* @return int
-	*/
-	public function borderBottomStyle($style = null)
-	{
-	} // borderBottomStyle
-
-	/**
-	* Set the border color on all sides of a cell
-	*
-	* @param int $color (optional, default=null) One of ExcelFormat::COLOR_* constants
-	* @return int The color, or true if no value supplied for $color
-	*/
-	public function borderColor($color = null)
-	{
-	} // borderColor
-
-	/**
-	* Get, or set the color of the diagonal of a cell
-	*
-	* @param int $color (optional, default=null) One of ExcelFormat::COLOR_* constants
-	* @return int
-	*/
-	public function borderDiagonalColor($color = null)
-	{
-	} // borderDiagonalColor
-
-	/**
-	* Get, or set the border for the diagonal of a cell
-	*
-	* @param int $style (optional, default=null) One of ExcelFormat::BORDERDIAGONAL_* constants
-	* @return int
-	*/
-	public function borderDiagonalStyle($style = null)
-	{
-	} // borderDiagonalStyle
-
-	/**
-	* Get, or set the color of the left side border of a cell
-	*
-	* @param int $color (optional, default=null) One of ExcelFormat::COLOR_* constants
-	* @return int
-	*/
-	public function borderLeftColor($color = null)
-	{
-	} // borderLeftColor
-
-	/**
-	* Get, or set the border style for the left side of a cell
-	*
-	* @param int $style (optional, default=null) One of ExcelFormat::BORDERSTYLE_* constants
-	* @return int
-	*/
-	public function borderLeftStyle($style = null)
-	{
-	} // borderLeftStyle
-
-	/**
-	* Get, or set the color of the right side border of a cell
-	*
-	* @param int $color (optional, default=null) One of ExcelFormat::COLOR_* constants
-	* @return int
-	*/
-	public function borderRightColor($color = null)
-	{
-	} // borderRightColor
-
-	/**
-	* Get, or set the border style for the right side of a cell
-	*
-	* @param int $style (optional, default=null) One of ExcelFormat::BORDERSTYLE_* constants
-	* @return int
-	*/
-	public function borderRightStyle($style = null)
-	{
-	} // borderRightStyle
-
-	/**
-	* Set the cell border style on all sides of a cell
-	*
-	* @param int $style (optional, default=null) One of ExcelFormat::BORDERSTYLE_* constants
-	* @return int The border style, or true if no value supplied for $style
-	*/
-	public function borderStyle($style = null)
-	{
-	} // borderStyle
-
-	/**
-	* Get, or set the color of the top border of a cell
-	*
-	* @param int $color (optional, default=null) One of ExcelFormat::COLOR_* constants
-	* @return int
-	*/
-	public function borderTopColor($color = null)
-	{
-	} // borderTopColor
-
-	/**
-	* Get, or set the border style for the top of a cell
-	*
-	* @param int $style (optional, default=null) One of ExcelFormat::BORDERSTYLE_* constants
-	* @return int
-	*/
-	public function borderTopStyle($style = null)
-	{
-	} // borderTopStyle
-
-	/**
-	* Get, or set the cell fill pattern
-	*
-	* @param int $pattern (optional, default=null) One of ExcelFormat::FILLPATTERN_* constants
-	* @return int
-	*/
-	public function fillPattern($pattern = null)
-	{
-	} // fillPattern
+	}
 
 	/**
 	* Get the font for this format
 	*
 	* @see ExcelFormat::setFont()
-	* @return ExcelFont
+	* @return ExcelFont|false
 	*/
-	public function getFont()
+	public function getFont(): ExcelFont|false
 	{
-	} // getFont
-
-	/**
-	* Get, or set whether the cell is hidden
-	*
-	* @param bool $hidden (optional, default=null)
-	* @return bool
-	*/
-	public function hidden($hidden = null)
-	{
-	} // hidden
-
-	/**
-	* Get, or set the cell horizontal alignment
-	*
-	* @see ExcelFormat::verticalAlign()
-	* @param int $halign_mode (optional, default=null) One of ExcelFormat::ALIGNH_* constants
-	* @return int
-	*/
-	public function horizontalAlign($halign_mode = null)
-	{
-	} // horizontalAlign
-
-	/**
-	* Get, or set the cell text indentation level
-	*
-	* @param int $indent (optional, default=null) A number from 0-15
-	* @return int
-	*/
-	public function indent($indent = null)
-	{
-	} // indent
-
-	/**
-	* Get, or set whether a cell is locked
-	*
-	* @param bool $locked (optional, default=null)
-	* @return bool
-	*/
-	public function locked($locked)
-	{
-	} // locked
-
-	/**
-	* Get, or set the cell number format
-	*
-	* @param int $number_format Number format identifier.  One of ExcelFormat::NUMFORMAT_* constants
-	* @return int
-	*/
-	public function numberFormat($number_format = null)
-	{
-	} // numberFormat
-
-	/**
-	* Get, or set the pattern background color
-	*
-	* @param int $color (optional, default=null) One of ExcelFormat::COLOR_* constants
-	* @return int
-	*/
-	public function patternBackgroundColor($color = null)
-	{
-	} // patternBackgroundColor
-
-	/**
-	* Get, or set the pattern foreground color
-	*
-	* @param int $color (optional, default=null) One of ExcelFormat::COLOR_* constants
-	* @return int
-	*/
-	public function patternForegroundColor($color = null)
-	{
-	} // patternForegroundColor
-
-	/**
-	* Get, or set the cell data rotation
-	*
-	* @param int $angle (optional, default=null) 0 to 90 (rotate left 0-90 degrees), 91 to 180 (rotate right 1-90 degrees), or 255 for vertical text
-	* @return int The angle of rotation, or false if setting an invalid value
-	*/
-	public function rotate($angle = null)
-	{
-	} // rotate
+	}
 
 	/**
 	* Set the font for this format
@@ -407,39 +196,250 @@ class ExcelFormat
 	* @param ExcelFont $font
 	* @return bool
 	*/
-	public function setFont($font)
+	public function setFont(ExcelFont $font): bool
 	{
-	} // setFont
+	}
 
 	/**
-	* Get, or set whether the cell is shrink-to-fit
+	* Get, or set the cell number format
 	*
-	* @param bool $shrink (optional, default=null)
-	* @return bool
+	* @param int $format (optional) One of ExcelFormat::NUMFORMAT_* constants
+	* @return int|false
 	*/
-	public function shrinkToFit($shrink = null)
+	public function numberFormat($format = null): int|false
 	{
-	} // shrinkToFit
+	}
+
+	/**
+	* Get, or set the cell horizontal alignment
+	*
+	* @see ExcelFormat::verticalAlign()
+	* @param int $align_mode (optional) One of ExcelFormat::ALIGNH_* constants
+	* @return int|false
+	*/
+	public function horizontalAlign($align_mode = null): int|false
+	{
+	}
 
 	/**
 	* Get, or set the cell vertical alignment
 	*
 	* @see ExcelFormat::horizontalAlign()
-	* @param int $valign_mode (optional, default=null) One of ExcelFormat::ALIGNV_* constants
-	* @return int
+	* @param int $align_mode (optional) One of ExcelFormat::ALIGNV_* constants
+	* @return int|false
 	*/
-	public function verticalAlign($valign_mode = null)
+	public function verticalAlign(int $align_mode = null): int|false
 	{
-	} // verticalAlign
+	}
 
 	/**
 	* Get, or set the cell text wrapping
 	*
-	* @param bool $wrap (optional, default=null)
+	* @param int $wrap (optional)
 	* @return bool
 	*/
-	public function wrap($wrap = null)
+	public function wrap(int $wrap = null): bool
 	{
-	} // wrap
+	}
+
+	/**
+	* Get, or set the cell data rotation
+	*
+	* @param int $angle (optional) 0 to 90 (rotate left), 91 to 180 (rotate right), or 255 for vertical text
+	* @return int|false
+	*/
+	public function rotate(int $angle = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the cell text indentation level
+	*
+	* @param int $indent (optional) A number from 0-15
+	* @return int|false
+	*/
+	public function indent(int $indent = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set whether the cell is shrink-to-fit
+	*
+	* @param mixed $shrink (optional)
+	* @return bool
+	*/
+	public function shrinkToFit($shrink = null): bool
+	{
+	}
+
+	/**
+	* Set the cell border style on all sides of a cell
+	*
+	* @param mixed $style (optional) One of ExcelFormat::BORDERSTYLE_* constants
+	* @return bool
+	*/
+	public function borderStyle($style = null): bool
+	{
+	}
+
+	/**
+	* Set the border color on all sides of a cell
+	*
+	* @param mixed $color (optional) One of ExcelFormat::COLOR_* constants
+	* @return bool
+	*/
+	public function borderColor($color = null): bool
+	{
+	}
+
+	/**
+	* Get, or set the border style for the left side of a cell
+	*
+	* @param mixed $style (optional) One of ExcelFormat::BORDERSTYLE_* constants
+	* @return int|false
+	*/
+	public function borderLeftStyle($style = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the color of the left side border of a cell
+	*
+	* @param mixed $color (optional) One of ExcelFormat::COLOR_* constants
+	* @return int|false
+	*/
+	public function borderLeftColor($color = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the border style for the right side of a cell
+	*
+	* @param mixed $style (optional) One of ExcelFormat::BORDERSTYLE_* constants
+	* @return int|false
+	*/
+	public function borderRightStyle($style = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the color of the right side border of a cell
+	*
+	* @param mixed $color (optional) One of ExcelFormat::COLOR_* constants
+	* @return int|false
+	*/
+	public function borderRightColor($color = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the border style for the top of a cell
+	*
+	* @param mixed $style (optional) One of ExcelFormat::BORDERSTYLE_* constants
+	* @return int|false
+	*/
+	public function borderTopStyle($style = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the color of the top border of a cell
+	*
+	* @param mixed $color (optional) One of ExcelFormat::COLOR_* constants
+	* @return int|false
+	*/
+	public function borderTopColor($color = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the border style for the bottom of a cell
+	*
+	* @param mixed $style (optional) One of ExcelFormat::BORDERSTYLE_* constants
+	* @return int|false
+	*/
+	public function borderBottomStyle($style = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the color of the bottom border of a cell
+	*
+	* @param mixed $color (optional) One of ExcelFormat::COLOR_* constants
+	* @return int|false
+	*/
+	public function borderBottomColor($color = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the border for the diagonal of a cell
+	*
+	* @param mixed $style (optional) One of ExcelFormat::BORDERDIAGONAL_* constants
+	* @return int|false
+	*/
+	public function borderDiagonalStyle($style = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the color of the diagonal of a cell
+	*
+	* @param mixed $color (optional) One of ExcelFormat::COLOR_* constants
+	* @return int|false
+	*/
+	public function borderDiagonalColor($color = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the cell fill pattern
+	*
+	* @param mixed $pattern (optional) One of ExcelFormat::FILLPATTERN_* constants
+	* @return int|false
+	*/
+	public function fillPattern($pattern = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the pattern foreground color
+	*
+	* @param mixed $color (optional) One of ExcelFormat::COLOR_* constants
+	* @return int|false
+	*/
+	public function patternForegroundColor($color = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the pattern background color
+	*
+	* @param mixed $color (optional) One of ExcelFormat::COLOR_* constants
+	* @return int|false
+	*/
+	public function patternBackgroundColor($color = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set whether a cell is locked
+	*
+	* @param mixed $locked (optional)
+	* @return bool
+	*/
+	public function locked($locked = null): bool
+	{
+	}
+
+	/**
+	* Get, or set whether the cell is hidden
+	*
+	* @param mixed $hidden (optional)
+	* @return bool
+	*/
+	public function hidden($hidden = null): bool
+	{
+	}
 
 } // end ExcelFormat
