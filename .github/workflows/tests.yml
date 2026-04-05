@@ -62,12 +62,15 @@ jobs:
 
       - name: Run tests
         if: matrix.libxl == '5.1.0'
-        env:
-          LD_LIBRARY_PATH: ${{ github.workspace }}/libxl-${{ matrix.libxl }}/lib64
-          TEST_PHP_EXECUTABLE: ${{ github.workspace }}/../../.phpenv/shims/php
-          NO_INTERACTION: 1
-          REPORT_EXIT_STATUS: 1
         run: |
+          export LD_LIBRARY_PATH="${{ github.workspace }}/libxl-${{ matrix.libxl }}/lib64"
           export TEST_PHP_EXECUTABLE=$(which php)
           export TEST_PHP_ARGS="-d extension=$(pwd)/modules/excel.so"
-          php run-tests.php --show-diff tests/
+          export NO_INTERACTION=1
+          RESULT=$(php run-tests.php --show-diff tests/ 2>&1)
+          echo "$RESULT"
+          FAILED=$(echo "$RESULT" | grep 'Tests failed' | grep -oP '\d+' | head -1)
+          if [ "$FAILED" -gt 0 ]; then
+            echo "::error::$FAILED test(s) failed"
+            exit 1
+          fi
