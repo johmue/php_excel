@@ -33,26 +33,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache LibXL
-        id: cache-libxl
-        uses: actions/cache@v4
-        with:
-          path: libxl-deps
-          key: libxl-win-${{ env.LIBXL_VERSION }}-v2
-
-      - name: Download LibXL
-        if: steps.cache-libxl.outputs.cache-hit != 'true'
+      - name: Download and prepare LibXL
         shell: pwsh
         run: |
           Invoke-WebRequest -Uri "https://www.libxl.com/download/libxl-win-${{ env.LIBXL_VERSION }}.zip" -OutFile libxl.zip
           Expand-Archive libxl.zip -DestinationPath libxl-extract
           $dir = Get-ChildItem -Path libxl-extract -Directory | Select-Object -First 1
-          New-Item -ItemType Directory -Path libxl-deps -Force
-          # Maintain include_c directory structure as config.w32 expects
-          Copy-Item -Path "$($dir.FullName)\include_c" -Destination libxl-deps\ -Recurse -Force
-          Copy-Item -Path "$($dir.FullName)\lib64\*" -Destination libxl-deps\ -Recurse -Force
-          Copy-Item -Path "$($dir.FullName)\lib\*" -Destination libxl-deps\ -Recurse -Force
-          Copy-Item -Path "$($dir.FullName)\bin64\*" -Destination libxl-deps\ -Recurse -Force
+          $depsDir = "libxl-deps"
+          New-Item -ItemType Directory -Path $depsDir -Force
+
+          # Headers (include_c/ for config.w32)
+          Copy-Item -Path "$($dir.FullName)\include_c" -Destination "$depsDir\" -Recurse -Force
+
+          # Select lib and bin for target architecture
+          if ("${{ matrix.arch }}" -eq "x64") {
+            Copy-Item -Path "$($dir.FullName)\lib64\libxl.lib" -Destination "$depsDir\libxl.lib" -Force
+            Copy-Item -Path "$($dir.FullName)\bin64\libxl.dll" -Destination "$depsDir\libxl.dll" -Force
+          } else {
+            Copy-Item -Path "$($dir.FullName)\lib\libxl.lib" -Destination "$depsDir\libxl.lib" -Force
+            Copy-Item -Path "$($dir.FullName)\bin\libxl.dll" -Destination "$depsDir\libxl.dll" -Force
+          }
+
+          Get-ChildItem $depsDir -Recurse | Select-Object FullName
 
       - name: Build extension
         uses: php/php-windows-builder/extension@v1

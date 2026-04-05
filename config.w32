@@ -2,16 +2,16 @@ ARG_WITH("excel", "Excel support", "no");
 ARG_WITH("libxl", "Path to LibXL", "no");
 
 if (PHP_EXCEL != "no") {
-    var libxl_search = PHP_PHP_BUILD;
-    if (PHP_LIBXL != "no") {
-        libxl_search = PHP_LIBXL + ";" + PHP_LIBXL + "\\include_c;" + libxl_search;
-    }
-    if (PHP_EXCEL != "yes" && PHP_EXCEL != "no") {
-        libxl_search = PHP_EXCEL + ";" + PHP_EXCEL + "\\include_c;" + libxl_search;
+    var header_search = PHP_PHP_BUILD + "\\include";
+    var lib_search = PHP_PHP_BUILD + "\\lib";
+
+    if (PHP_LIBXL != "no" && PHP_LIBXL != "yes") {
+        header_search = PHP_LIBXL + "\\include_c;" + PHP_LIBXL + ";" + header_search;
+        lib_search = PHP_LIBXL + ";" + PHP_LIBXL + "\\lib64;" + PHP_LIBXL + "\\lib;" + lib_search;
     }
 
-    if (CHECK_LIB("libxl.lib", "excel", libxl_search) &&
-        CHECK_HEADER_ADD_INCLUDE("libxl.h", "CFLAGS_EXCEL", libxl_search)) {
+    if (CHECK_HEADER_ADD_INCLUDE("libxl.h", "CFLAGS_EXCEL", header_search) &&
+        CHECK_LIB("libxl.lib", "excel", lib_search)) {
         EXTENSION("excel", "excel.c");
         AC_DEFINE("HAVE_EXCELLIB", 1, "Have LibXL library");
         AC_DEFINE("HAVE_LIBXL_SETKEY", 1, "Have LibXL license key support");
