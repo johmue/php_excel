@@ -30,6 +30,16 @@ PHP extension for reading and writing Excel files (XLS and XLSX) using the [LibX
 
 ### Installation
 
+Via [PIE](https://github.com/php/pie):
+
+```sh
+pie install iliaal/php-excel \
+  --with-libxl-incdir=/path/to/libxl/include_c \
+  --with-libxl-libdir=/path/to/libxl/lib64
+```
+
+Or manually:
+
 ```sh
 phpize
 ./configure --with-excel \
