@@ -15,8 +15,8 @@
 class ExcelFont
 {
 	const NORMAL = 0;
-	const SUPERSCRIPT = 1;
-	const SUBSCRIPT = 2;
+	const SUBSCRIPT = 1;
+	const SUPERSCRIPT = 2;
 
 	const UNDERLINE_NONE = 0;
 	const UNDERLINE_SINGLE = 1;
@@ -29,11 +29,60 @@ class ExcelFont
 	*
 	* @see ExcelBook::addFont()
 	* @param ExcelBook $book
-	* @return ExcelFont
 	*/
-	public function __construct(ExcelBook $book)
+	final public function __construct(ExcelBook $book)
 	{
-	} // __construct
+	}
+
+	/**
+	* Get, or set the font size
+	*
+	* @param int $size (optional, default=null)
+	* @return int|false The current font size
+	*/
+	public function size(int $size = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the font name
+	*
+	* @param string $name (optional, default=null)
+	* @return string|false
+	*/
+	public function name(string $name = null): string|false
+	{
+	}
+
+	/**
+	* Get, or set the underline style
+	*
+	* @param int $underline_style (optional, default=null) One of ExcelFont::UNDERLINE_* constants
+	* @return int|false
+	*/
+	public function underline(int $underline_style = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the font script mode
+	*
+	* @param int $mode (optional, default=null) One of ExcelFont::NORMAL, ::SUBSCRIPT, or ::SUPERSCRIPT
+	* @return int|false
+	*/
+	public function mode(int $mode = null): int|false
+	{
+	}
+
+	/**
+	* Get, or set the font color
+	*
+	* @param int $color (optional, default=null) One of ExcelFormat::COLOR_* constants
+	* @return int|false
+	*/
+	public function color(int $color = null): int|false
+	{
+	}
 
 	/**
 	* Get, or set if bold is on or off
@@ -41,59 +90,9 @@ class ExcelFont
 	* @param bool $bold (optional, default=null)
 	* @return bool
 	*/
-	public function bold($bold = null)
+	public function bold(bool $bold = null): bool
 	{
-	} // bold
-
-	/**
-	* Get, or set the font color
-	*
-	* @param int $color (optional, default=null) One of ExcelFormat::COLOR_* constants
-	* @return int
-	*/
-	public function color($color = null)
-	{
-	} // color
-
-	/**
-	* Get, or set if italics are on or off
-	*
-	* @param bool $italics (optional, default=null)
-	* @return bool
-	*/
-	public function italics($italics = null)
-	{
-	} // italics
-
-	/**
-	* Get, or set the font script mode
-	*
-	* @param int $mode (optional, default=null) One of ExcelFont::NORMAL, ::SUBSCRIPT, or ::SUPERSCRIPT
-	* @return int
-	*/
-	public function mode($mode = null)
-	{
-	} // mode
-
-	/**
-	* Get, or set the font name
-	*
-	* @param string $font_name (optional, default=null)
-	* @return string
-	*/
-	public function name($font_name = null)
-	{
-	} // name
-
-	/**
-	* Get, or set the font size
-	*
-	* @param int $size (optional, default=null)
-	* @return int The current font size
-	*/
-	public function size($size = null)
-	{
-	} // size
+	}
 
 	/**
 	* Get, or set if strike-through is on or off
@@ -101,18 +100,18 @@ class ExcelFont
 	* @param bool $strike (optional, default=null)
 	* @return bool
 	*/
-	public function strike($strike = null)
+	public function strike(bool $strike = null): bool
 	{
-	} // strike
+	}
 
 	/**
-	* Get, or set the underline style
+	* Get, or set if italics are on or off
 	*
-	* @param int $underline (optional, default=null) One of ExcelFont::UNDERLINE_* constants
-	* @return int
+	* @param bool $italics (optional, default=null)
+	* @return bool
 	*/
-	public function underline($underline = null)
+	public function italics(bool $italics = null): bool
 	{
-	} // underline
+	}
 
 } // end ExcelFont

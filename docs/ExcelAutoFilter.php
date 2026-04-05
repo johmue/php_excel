@@ -14,94 +14,104 @@
 class ExcelAutoFilter
 {
 	/**
-	* Create a AutoFilter within an Excel sheet
+	* Create an AutoFilter within an Excel sheet
 	*
-	* @see ExcelSheet::autofilter()
-	* @param ExcelSheet $sheet
-	* @return ExcelAutoFilter
+	* @see ExcelSheet::autoFilter()
+	* @param ExcelSheet|null $sheet
 	*/
-	public function __construct(ExcelSheet $sheet)
+	public function __construct(?ExcelSheet $sheet = null)
 	{
-	} // __construct
+	}
 
 	/**
-	* Gets the cell range of AutoFilter with header.
+	* Gets the cell range of AutoFilter with header
 	*
-	* @return array with keys "row_first"(int), "row_last"(int), "col_first"(int), "col_last"(int)
+	* @return array|false Array with keys "row_first"(int), "row_last"(int), "col_first"(int), "col_last"(int)
 	*/
-	public function getRef()
+	public function getRef(): array|false
 	{
-	} // getRef
+	}
 
 	/**
-	* Sets the cell range of AutoFilter with header.
+	* Sets the cell range of AutoFilter with header
 	*
-	* @param int $row_first 0-based (optional, default = 0)
-	* @param int $row_last 0-based (optional, default = 0)
-	* @param int $col_first 0-based (optional, default = 0)
-	* @param int $col_last 0-based (optional, default = 0)
+	* @param int $row_first 0-based (optional, default=0)
+	* @param int $col_first 0-based (optional, default=0)
+	* @param int $row_last 0-based (optional, default=0)
+	* @param int $col_last 0-based (optional, default=0)
 	* @return void
 	*/
-	public function setRef($row_first = 0, $row_last = 0, $col_first = 0, $col_last = 0)
+	public function setRef(int $row_first = 0, int $col_first = 0, int $row_last = 0, int $col_last = 0)
 	{
-	} // setRef
+	}
 
 	/**
-	* Returns the AutoFilter column by zero-based index. Creates it if it doesn't exist.
+	* Returns the AutoFilter column by zero-based column ID. Creates it if it doesn't exist.
 	*
 	* @param int $colId 0-based
-	* @return ExcelFilterColumn
+	* @return ExcelFilterColumn|false
 	*/
-	public function column($colId)
+	public function column(int $colId): ExcelFilterColumn|false
 	{
-	} // column
+	}
 
 	/**
-	* Returns the number of specified AutoFilter columns which have a filter information.
+	* Returns the number of specified AutoFilter columns which have filter information
 	*
-	* @return int
+	* @return int|false
 	*/
-	public function columnSize()
+	public function columnSize(): int|false
 	{
-	} // columnSize
+	}
 
 	/**
-	* Returns the specified AutoFilter column which have a filter information by index.
+	* Returns the specified AutoFilter column which has filter information by index
 	*
 	* @param int $index 0-based
-	* @return ExcelFilterColumn
+	* @return ExcelFilterColumn|false
 	*/
-	public function columnByIndex($index)
+	public function columnByIndex(int $index): ExcelFilterColumn|false
 	{
-	} // columnByIndex
+	}
 
 	/**
-	* Gets the whole range of data to sort.
+	* Gets the whole range of data to sort
 	*
-	* @return array with keys "row_first"(int), "col_first"(int), "row_last"(int), "col_last"(int)
+	* @return array|false Array with keys "row_first"(int), "col_first"(int), "row_last"(int), "col_last"(int)
 	*/
-	public function getSortRange()
+	public function getSortRange(): array|false
 	{
-	} // getSortRange
+	}
 
 	/**
-	* Gets the zero-based index of sorted column in AutoFilter and its sort order.
+	* Gets the zero-based index of sorted column in AutoFilter and its sort order
 	*
-	* @return array with keys "column_index"(int), "descending"(bool),
+	* @return array|false Array with keys "column_index"(int), "descending"(bool)
 	*/
-	public function getSort()
+	public function getSort(): array|false
 	{
-	} // getSort
+	}
 
 	/**
-	* Sets the sorted column in AutoFilter by zero-based index and its sort order.
+	* Sets the sorted column in AutoFilter by zero-based index and its sort order
 	*
 	* @param int $columnIndex 0-based
 	* @param bool $descending
 	* @return bool
 	*/
-	public function setSort($columnIndex, $descending)
+	public function setSort(int $columnIndex, bool $descending): bool
 	{
-	} // setSort
+	}
+
+	/**
+	* Adds a sorted column to the AutoFilter by zero-based index with sort order
+	*
+	* @param int $columnIndex 0-based
+	* @param bool $descending
+	* @return bool
+	*/
+	public function addSort(int $columnIndex, bool $descending): bool
+	{
+	}
 
 } // end ExcelAutoFilter

@@ -34,110 +34,110 @@ class ExcelFilterColumn
 	*
 	* @see ExcelAutoFilter::column()
 	* @param ExcelAutoFilter $autoFilter
-	* @return ExcelFilterColumn
+	* @param int $colId
 	*/
-	public function __construct(ExcelAutoFilter $autoFilter)
+	public function __construct(ExcelAutoFilter $autoFilter, int $colId)
 	{
-	} // __construct
+	}
 
 	/**
-	* Returns the zero-based index of this AutoFilter column.
+	* Returns the zero-based index of this AutoFilter column
 	*
-	* @return int
+	* @return int|false
 	*/
-	public function index()
+	public function index(): int|false
 	{
-	} // index
+	}
 
 	/**
-	* Returns the filter type of this AutoFilter column.
+	* Returns the filter type of this AutoFilter column
 	*
-	* @return int One of ExcelFilterColumn::FILTER_* constants
+	* @return int|false One of ExcelFilterColumn::FILTER_* constants
 	*/
-	public function filterType()
+	public function filterType(): int|false
 	{
-	} // filterType
+	}
 
 	/**
-	* Returns the number of filter values.
+	* Returns the number of filter values
 	*
-	* @return int
+	* @return int|false
 	*/
-	public function filterSize()
+	public function filterSize(): int|false
 	{
-	} // filterSize
+	}
 
 	/**
-	* Returns the filter value by index.
+	* Returns the filter value by index
 	*
 	* @param int $index
-	* @return string filter value
+	* @return string|false
 	*/
-	public function filter($index)
+	public function filter(int $index): string|false
 	{
-	} // filter
+	}
 
 	/**
-	* Adds the filter value.
+	* Adds the filter value
 	*
 	* @param string $filterValue
-	* @return void
-	*/
-	public function addFilter($filterValue)
-	{
-	} // addFilter
-
-	/**
-	* Gets the number of top or bottom items:
-	*
-	* @return array with keys "value"(float), "top"(bool) and "percent"(bool)
-	*/
-	public function getTop10()
-	{
-	} // getTop10
-
-	/**
-	* Sets the number of top or bottom items:
-	*
-	* @param float $value - number of items;
-	* @param bool $top - top items if true otherwise bottom items; (optional, default = true)
-	* @param bool $percent - using percent instead of number items. (optional, default = false)
 	* @return bool
 	*/
-	public function setTop10($value, $top = true, $percent = false)
+	public function addFilter(string $filterValue): bool
 	{
-	} // setTop10
+	}
 
 	/**
-	* Gets the custom filter criteria:
+	* Gets the number of top or bottom items
 	*
-	* @return array with keys "operator_1"(int), "value_1"(string), "operator_2"(int), "value_2"(string) and "andOp"(bool)
+	* @return array|false Array with keys "value"(float), "top"(bool) and "percent"(bool)
 	*/
-	public function getCustomFilter()
+	public function getTop10(): array|false
 	{
-	} // getCustomFilter
+	}
 
 	/**
-	* Sets the custom filter criteria.
+	* Sets the number of top or bottom items
 	*
-	* @param int $op1 - one of ExcelFilterColumn::OPERATOR_* constants - operator used by the filter comparison in the first filter criteria;
-	* @param string $v1 - value used in the first filter criteria;
-	* @param int $op2 - one of ExcelFilterColumn::OPERATOR_* constants - operator used by the filter comparison in the second filter criteria; (optional, default = -1)
-	* @param string $v2 - value used in the second filter criteria; (optional, default = null)
-	* @param bool $andOp - flag indicating whether the two criterias have an "and" relationship. True indicates "and", false indicates "or". (optional, default = false)
-	* @return void
+	* @param float $value Number of items
+	* @param bool $top (optional, default=true) Top items if true, bottom items otherwise
+	* @param bool $percent (optional, default=false) Using percent instead of number items
+	* @return bool
 	*/
-	public function setCustomFilter($op1, $v1, $op2 = -1, $v2 = null, $andOp = false)
+	public function setTop10(float $value, bool $top = true, bool $percent = false): bool
 	{
-	} // setCustomFilter
+	}
 
 	/**
-	* Clear the filter criteria.
+	* Gets the custom filter criteria
+	*
+	* @return array|false Array with keys "operator_1"(int), "value_1"(string), "operator_2"(int), "value_2"(string) and "andOp"(bool)
+	*/
+	public function getCustomFilter(): array|false
+	{
+	}
+
+	/**
+	* Sets the custom filter criteria
+	*
+	* @param int $operator_1 One of ExcelFilterColumn::OPERATOR_* constants
+	* @param string $value_1 Value used in the first filter criteria
+	* @param int $operator_2 (optional) One of ExcelFilterColumn::OPERATOR_* constants
+	* @param string $value_2 (optional) Value used in the second filter criteria
+	* @param bool $andOp (optional, default=false) True indicates "and", false indicates "or"
+	* @return bool
+	*/
+	public function setCustomFilter(int $operator_1, string $value_1, int $operator_2 = null, string $value_2 = null, bool $andOp = false): bool
+	{
+	}
+
+	/**
+	* Clear the filter criteria
 	*
 	* @return bool
 	*/
-	public function clear()
+	public function clear(): bool
 	{
-	} // clear
+	}
 
 } // end ExcelFilterColumn
