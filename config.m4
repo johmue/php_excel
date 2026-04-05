@@ -9,7 +9,17 @@ PHP_ARG_WITH(libxl-incdir, C include dir for libxl,
 PHP_ARG_WITH(libxl-libdir, lib dir for libxl,
 [  --with-libxl-libdir[=DIR] Library path for libxl])
 
+PHP_ARG_ENABLE(excel-dev, whether to enable developer build flags,
+[  --enable-excel-dev    Enable developer build flags (warnings, sanitizers)], no, no)
+
 if test "$PHP_EXCEL" != "no"; then
+
+  dnl Check minimum PHP version (8.3.0 = 80300)
+  PHP_VERSION_ID=$($PHP_CONFIG --vernum)
+  if test "$PHP_VERSION_ID" -lt "80300"; then
+    AC_MSG_ERROR([php_excel requires PHP 8.3.0 or later (found $PHP_VERSION_ID)])
+  fi
+
   SEARCH_PATH="/usr/local /usr"
   SEARCH_FOR="libxl.h"
 
@@ -33,7 +43,7 @@ if test "$PHP_EXCEL" != "no"; then
     AC_MSG_RESULT(found in $EXCEL_INCDIR)
   fi
 
-  SEARCH_FOR="libxl.so"
+  SEARCH_FOR="libxl.${SHLIB_SUFFIX_NAME:-so}"
 
   AC_MSG_CHECKING([for excel libraries])
   if test -r "$PHP_LIBXL_LIBDIR/$PHP_LIBDIR/$SEARCH_FOR"; then
@@ -75,6 +85,13 @@ if test "$PHP_EXCEL" != "no"; then
     -L$EXCEL_LIBDIR
   ])
 
+  dnl Developer build flags
+  if test "$PHP_EXCEL_DEV" = "yes"; then
+    EXCEL_DEV_CFLAGS="-Wall -Wextra -Wno-unused-parameter -Wimplicit-fallthrough -Werror"
+    PHP_EXCEL_CFLAGS="$PHP_EXCEL_CFLAGS $EXCEL_DEV_CFLAGS"
+    CFLAGS="$CFLAGS $EXCEL_DEV_CFLAGS"
+  fi
+
   PHP_SUBST(EXCEL_SHARED_LIBADD)
-  PHP_NEW_EXTENSION(excel, excel.c, $ext_shared)
+  PHP_NEW_EXTENSION(excel, excel.c, $ext_shared,, $PHP_EXCEL_CFLAGS)
 fi

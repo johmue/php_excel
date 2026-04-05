@@ -1,14 +1,19 @@
-ARG_WITH("excel", "Excel", "no");
+ARG_WITH("excel", "Excel support", "no");
+ARG_WITH("libxl", "Path to LibXL", "no");
 
 if (PHP_EXCEL != "no") {
-	if (CHECK_LIB("libxl.lib", "excel", PHP_EXCEL) && CHECK_HEADER_ADD_INCLUDE("libxl.h", "CFLAGS_EXCEL",  PHP_EXCEL+ ";" + PHP_PHP_BUILD + "\\include\\libxl")) {
-		EXTENSION("excel", "excel.c");
-		AC_DEFINE('HAVE_EXCELLIB', 1, 'Have LibXL library');
-		AC_DEFINE('HAVE_LIBXL_243_PLUS', 1, 'Have LibXL version 2.4.3 or later');
-		AC_DEFINE("HAVE_LIBXL_SETKEY", 1, "non-source libxl build");
-		AC_DEFINE("EXCEL_WITH_LIBXML", 1, "libxml support");
-	} else {
-		WARNING("excel not enabled; libraries and headers not found");
-		PHP_EXCEL = "no";
-	}
+    var libxl_path = PHP_EXCEL;
+    if (PHP_LIBXL != "no") {
+        libxl_path = PHP_LIBXL;
+    }
+
+    if (CHECK_LIB("libxl.lib", "excel", libxl_path) &&
+        CHECK_HEADER_ADD_INCLUDE("libxl.h", "CFLAGS_EXCEL", libxl_path + "\\include_c;" + PHP_EXCEL + ";" + PHP_PHP_BUILD + "\\include\\libxl")) {
+        EXTENSION("excel", "excel.c");
+        AC_DEFINE("HAVE_EXCELLIB", 1, "Have LibXL library");
+        AC_DEFINE("HAVE_LIBXL_SETKEY", 1, "Have LibXL license key support");
+    } else {
+        WARNING("excel not enabled; libxl libraries and headers not found");
+        PHP_EXCEL = "no";
+    }
 }

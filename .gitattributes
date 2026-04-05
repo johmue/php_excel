@@ -1,0 +1,18 @@
+# Auto detect text files and normalize line endings
+* text=auto
+
+# Test expected output must preserve exact line endings and whitespace
+tests/*.phpt -text
+
+# Binary files
+*.so binary
+*.dll binary
+*.lib binary
+*.phar binary
+
+# Exclude from distribution archives
+.github/ export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
+CLAUDE.md export-ignore
+CONTRIBUTOR.md export-ignore

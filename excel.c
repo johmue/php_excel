@@ -9752,7 +9752,7 @@ const zend_function_entry excel_funcs_book[] = {
 #endif
 	EXCEL_ME(Book, coreProperties, arginfo_Book_coreProperties, 0)
 	EXCEL_ME(Book, removeAllPhonetics, arginfo_Book_removeAllPhonetics, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry excel_funcs_sheet[] = {
@@ -9776,6 +9776,7 @@ const zend_function_entry excel_funcs_sheet[] = {
 	EXCEL_ME(Sheet, rowHeight, arginfo_Sheet_rowHeight, 0)
 	EXCEL_ME(Sheet, readComment, arginfo_Sheet_readComment, 0)
 	EXCEL_ME(Sheet, writeComment, arginfo_Sheet_writeComment, 0)
+	EXCEL_ME(Sheet, removeComment, arginfo_Sheet_removeComment, 0)
 	EXCEL_ME(Sheet, setColWidth, arginfo_Sheet_setColWidth, 0)
 	EXCEL_ME(Sheet, setRowHeight, arginfo_Sheet_setRowHeight, 0)
 	EXCEL_ME(Sheet, getMerge, arginfo_Sheet_getMerge, 0)
@@ -9925,7 +9926,7 @@ const zend_function_entry excel_funcs_sheet[] = {
 	EXCEL_ME(Sheet, removeConditionalFormatting, arginfo_Sheet_removeConditionalFormatting, 0)
 	EXCEL_ME(Sheet, conditionalFormattingSize, arginfo_Sheet_conditionalFormattingSize, 0)
 #endif
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry excel_funcs_font[] = {
@@ -9938,7 +9939,7 @@ const zend_function_entry excel_funcs_font[] = {
 	EXCEL_ME(Font, strike, arginfo_Font_strike, 0)
 	EXCEL_ME(Font, italics, arginfo_Font_italics, 0)
 	EXCEL_ME(Font, __construct, arginfo_Font___construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry excel_funcs_format[] = {
@@ -9969,7 +9970,7 @@ const zend_function_entry excel_funcs_format[] = {
 	EXCEL_ME(Format, locked, arginfo_Format_locked, 0)
 	EXCEL_ME(Format, hidden, arginfo_Format_hidden, 0)
 	EXCEL_ME(Format, __construct, arginfo_Format___construct, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry excel_funcs_autofilter[] = {
@@ -9983,7 +9984,7 @@ const zend_function_entry excel_funcs_autofilter[] = {
 	EXCEL_ME(AutoFilter, getSort, arginfo_AutoFilter_getSort, 0)
 	EXCEL_ME(AutoFilter, setSort, arginfo_AutoFilter_setSort, 0)
 	EXCEL_ME(AutoFilter, addSort, arginfo_AutoFilter_addSort, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry excel_funcs_filtercolumn[] = {
@@ -9998,7 +9999,7 @@ const zend_function_entry excel_funcs_filtercolumn[] = {
 	EXCEL_ME(FilterColumn, getCustomFilter, arginfo_FilterColumn_getCustomFilter, 0)
 	EXCEL_ME(FilterColumn, setCustomFilter, arginfo_FilterColumn_setCustomFilter, 0)
 	EXCEL_ME(FilterColumn, clear, arginfo_FilterColumn_clear, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry excel_funcs_richstring[] = {
@@ -10007,7 +10008,7 @@ const zend_function_entry excel_funcs_richstring[] = {
 	EXCEL_ME(RichString, addText, arginfo_RichString_addText, 0)
 	EXCEL_ME(RichString, getText, arginfo_RichString_getText, 0)
 	EXCEL_ME(RichString, textSize, arginfo_RichString_textSize, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry excel_funcs_formcontrol[] = {
@@ -10057,7 +10058,7 @@ const zend_function_entry excel_funcs_formcontrol[] = {
 	EXCEL_ME(FormControl, setSel, arginfo_FormControl_setLong, 0)
 	EXCEL_ME(FormControl, fromAnchor, arginfo_FormControl_void, 0)
 	EXCEL_ME(FormControl, toAnchor, arginfo_FormControl_void, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry excel_funcs_conditionalformat[] = {
@@ -10091,7 +10092,7 @@ const zend_function_entry excel_funcs_conditionalformat[] = {
 	EXCEL_ME(ConditionalFormat, setPatternForegroundColor, arginfo_ConditionalFormat_setLong, 0)
 	EXCEL_ME(ConditionalFormat, patternBackgroundColor, arginfo_ConditionalFormat_void, 0)
 	EXCEL_ME(ConditionalFormat, setPatternBackgroundColor, arginfo_ConditionalFormat_setLong, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry excel_funcs_conditionalformatting[] = {
@@ -10107,7 +10108,7 @@ const zend_function_entry excel_funcs_conditionalformatting[] = {
 	EXCEL_ME(ConditionalFormatting, add2ColorScaleFormulaRule, arginfo_ConditionalFormatting_add2ColorScaleFormulaRule, 0)
 	EXCEL_ME(ConditionalFormatting, add3ColorScaleRule, arginfo_ConditionalFormatting_add3ColorScaleRule, 0)
 	EXCEL_ME(ConditionalFormatting, add3ColorScaleFormulaRule, arginfo_ConditionalFormatting_add3ColorScaleFormulaRule, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry excel_funcs_coreproperties[] = {
@@ -10135,7 +10136,7 @@ const zend_function_entry excel_funcs_coreproperties[] = {
 	EXCEL_ME(CoreProperties, modifiedAsDouble, arginfo_CoreProperties_void, 0)
 	EXCEL_ME(CoreProperties, setModifiedAsDouble, arginfo_CoreProperties_setDouble, 0)
 	EXCEL_ME(CoreProperties, removeAll, arginfo_CoreProperties_void, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 const zend_function_entry excel_funcs_table[] = {
@@ -10158,7 +10159,7 @@ const zend_function_entry excel_funcs_table[] = {
 	EXCEL_ME(Table, columnSize, arginfo_Table_void, 0)
 	EXCEL_ME(Table, columnName, arginfo_Table_columnName, 0)
 	EXCEL_ME(Table, setColumnName, arginfo_Table_setColumnName, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ PHP_MINIT_FUNCTION
@@ -10634,7 +10635,7 @@ static PHP_GINIT_FUNCTION(excel)
 /* {{{ excel_functions[]
  */
 const zend_function_entry excel_functions[] = {
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

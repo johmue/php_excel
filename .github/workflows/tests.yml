@@ -1,0 +1,75 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  LIBXL_VERSION: "5.1.0"
+
+jobs:
+  linux:
+    name: PHP ${{ matrix.php }} - ${{ matrix.libxl }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4', '8.5']
+        libxl: ['5.1.0']
+        include:
+          - php: '8.4'
+            libxl: '4.6.0'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: phpize, php-config
+
+      - name: Cache LibXL
+        id: cache-libxl
+        uses: actions/cache@v4
+        with:
+          path: libxl-${{ matrix.libxl }}
+          key: libxl-lin-${{ matrix.libxl }}
+
+      - name: Download LibXL
+        if: steps.cache-libxl.outputs.cache-hit != 'true'
+        run: |
+          curl -fsSL "https://www.libxl.com/download/libxl-lin-${{ matrix.libxl }}.tar.gz" -o libxl.tar.gz
+          tar xzf libxl.tar.gz
+          mv libxl-${{ matrix.libxl }}.0 libxl-${{ matrix.libxl }} || true
+          ls libxl-${{ matrix.libxl }}/include_c/libxl.h
+
+      - name: Build extension
+        run: |
+          phpize
+          ./configure \
+            --with-excel \
+            --with-libxl-incdir=${{ github.workspace }}/libxl-${{ matrix.libxl }}/include_c \
+            --with-libxl-libdir=${{ github.workspace }}/libxl-${{ matrix.libxl }}/lib64
+          make -j$(nproc)
+
+      - name: Verify zero warnings
+        run: |
+          make clean
+          WARNINGS=$(make -j$(nproc) 2>&1 | grep -c 'warning:' || true)
+          if [ "$WARNINGS" -gt 0 ]; then
+            echo "::error::Build produced $WARNINGS warning(s)"
+            make -j$(nproc) 2>&1 | grep 'warning:'
+            exit 1
+          fi
+
+      - name: Run tests
+        if: matrix.libxl == '5.1.0'
+        run: |
+          export LD_LIBRARY_PATH="${{ github.workspace }}/libxl-${{ matrix.libxl }}/lib64"
+          export TEST_PHP_EXECUTABLE=$(which php)
+          export TEST_PHP_ARGS="-d extension=$(pwd)/modules/excel.so"
+          export NO_INTERACTION=1
+          php run-tests.php --show-diff tests/
