@@ -390,7 +390,7 @@ static zend_object *excel_object_new_book(zend_class_entry *class_type)
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
 
-	intern->book = xlCreateBook();
+	intern->book = NULL;
 	intern->std.handlers = &excel_object_handlers_book;
 
 	return &intern->std;
@@ -530,15 +530,11 @@ static void excel_autofilter_object_free_storage(zend_object *object)
 	zend_object_std_dtor(&intern->std);
 }
 
-static zend_object *excel_object_new_autofilter_ex(zend_class_entry *class_type, excel_autofilter_object **ptr)
+static zend_object *excel_object_new_autofilter(zend_class_entry *class_type)
 {
 	excel_autofilter_object *intern;
 
 	intern = zend_object_alloc(sizeof(excel_autofilter_object), class_type);
-
-	if (ptr) {
-		*ptr = intern;
-	}
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -548,26 +544,17 @@ static zend_object *excel_object_new_autofilter_ex(zend_class_entry *class_type,
 	return &intern->std;
 }
 
-static zend_object *excel_object_new_autofilter(zend_class_entry *class_type)
-{
-	return excel_object_new_autofilter_ex(class_type, NULL);
-}
-
 static void excel_filtercolumn_object_free_storage(zend_object *object)
 {
 	excel_filtercolumn_object *intern = php_excel_filtercolumn_object_fetch_object(object);
 	zend_object_std_dtor(&intern->std);
 }
 
-static zend_object *excel_object_new_filtercolumn_ex(zend_class_entry *class_type, excel_filtercolumn_object **ptr)
+static zend_object *excel_object_new_filtercolumn(zend_class_entry *class_type)
 {
 	excel_filtercolumn_object *intern;
 
 	intern = zend_object_alloc(sizeof(excel_filtercolumn_object), class_type);
-
-	if (ptr) {
-		*ptr = intern;
-	}
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -575,11 +562,6 @@ static zend_object *excel_object_new_filtercolumn_ex(zend_class_entry *class_typ
 	intern->std.handlers = &excel_object_handlers_filtercolumn;
 
 	return &intern->std;
-}
-
-static zend_object *excel_object_new_filtercolumn(zend_class_entry *class_type)
-{
-	return excel_object_new_filtercolumn_ex(class_type, NULL);
 }
 
 static void excel_richstring_object_free_storage(zend_object *object)
@@ -806,16 +788,16 @@ EXCEL_METHOD(Book, save)
 	}
 
 	if (filename_zs && ZSTR_LEN(filename_zs) > 0) {
-		int numbytes;
+		ssize_t numbytes;
 		php_stream *stream = php_stream_open_wrapper(ZSTR_VAL(filename_zs), "wb", REPORT_ERRORS, NULL);
 
 		if (!stream) {
 			RETURN_FALSE;
 		}
 
-		if ((numbytes = php_stream_write(stream, contents, len)) != len) {
+		if ((numbytes = php_stream_write(stream, contents, len)) != (ssize_t)len) {
 			php_stream_close(stream);
-			php_error_docref(NULL, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, len);
+			php_error_docref(NULL, E_WARNING, "Only %zd of %u bytes written, possibly out of free disk space", numbytes, len);
 			RETURN_FALSE;
 		}
 
@@ -1138,12 +1120,13 @@ EXCEL_METHOD(Book, getAllFormats)
 
 	BOOK_FROM_OBJECT(book, object);
 
-	array_init(return_value);
-
 	fc = xlBookFormatSize(book);
 	if (!fc) {
+		array_init(return_value);
 		return;
 	}
+
+	array_init_size(return_value, fc);
 
 	for (c = 0; c < fc; c++) {
 		FormatHandle format;
@@ -1253,10 +1236,6 @@ EXCEL_METHOD(Book, packDate)
 }
 /* }}} */
 
-static double _php_excel_date_pack_values(BookHandle book, int year, int month, int day, int hour, int min, int sec)
-{
-	return xlBookDatePack(book, year, month, day, hour, min, sec, 0);
-}
 
 /* {{{ proto float ExcelBook::packDateValues(int year, int month, int day, int hour, int minute, int second)
 	Pack a date by single values into an Excel Double */
@@ -1305,7 +1284,7 @@ EXCEL_METHOD(Book, packDateValues)
 
 	BOOK_FROM_OBJECT(book, object);
 
-	if ((dt = _php_excel_date_pack_values(book, year, month, day, hour, min, sec)) == -1) {
+	if ((dt = xlBookDatePack(book, year, month, day, hour, min, sec, 0)) == -1) {
 		RETURN_FALSE;
 	}
 	RETURN_DOUBLE(dt);
@@ -1482,17 +1461,21 @@ EXCEL_METHOD(Book, __construct)
 		RETURN_FALSE;
 	}
 
-	BOOK_FROM_OBJECT(book, object);
-
-	if (new_excel) {
-		excel_book_object *obj = (excel_book_object*) Z_EXCEL_BOOK_OBJ_P(object);
-		if ((book = xlCreateXMLBook())) {
-			xlBookRelease(obj->book);
-			obj->book = book;
+	{
+		excel_book_object *obj = Z_EXCEL_BOOK_OBJ_P(object);
+		if (new_excel) {
+			book = xlCreateXMLBook();
 		} else {
-			zend_throw_exception(NULL, "Failed to create XLSX book", 0);
+			book = xlCreateBook();
+		}
+		if (!book) {
+			zend_throw_exception(NULL, "Failed to create book", 0);
 			RETURN_THROWS();
 		}
+		if (obj->book) {
+			xlBookRelease(obj->book);
+		}
+		obj->book = book;
 	}
 
 #if defined(HAVE_LIBXL_SETKEY)
@@ -1563,7 +1546,9 @@ static void php_excel_add_picture(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{
 		php_stream_close(stream);
 
 		if (!contents || ZSTR_LEN(contents) < 1) {
-			zend_string_release(contents);
+			if (contents) {
+				zend_string_release(contents);
+			}
 			RETURN_FALSE;
 		}
 		ret = xlBookAddPicture2(book, ZSTR_VAL(contents), ZSTR_LEN(contents));
@@ -2298,13 +2283,6 @@ EXCEL_METHOD(Format, getFont)
 	zval *object = ZEND_THIS;
 	FontHandle font;
 	excel_font_object *fo;
-	excel_format_object *obj = Z_EXCEL_FORMAT_OBJ_P(object);
-
-	format = obj->format;
-	if (!format) {
-		php_error_docref(NULL, E_WARNING, "The format wasn't initialized");
-		RETURN_FALSE;
-	}
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -2315,10 +2293,13 @@ EXCEL_METHOD(Format, getFont)
 		RETURN_FALSE;
 	}
 
-	ZVAL_OBJ(return_value, excel_object_new_font(excel_ce_font));
-	fo = Z_EXCEL_FONT_OBJ_P(return_value);
-	fo->font = font;
-	fo->book = obj->book;
+	{
+		excel_format_object *fobj = Z_EXCEL_FORMAT_OBJ_P(object);
+		ZVAL_OBJ(return_value, excel_object_new_font(excel_ce_font));
+		fo = Z_EXCEL_FONT_OBJ_P(return_value);
+		fo->font = font;
+		fo->book = fobj->book;
+	}
 }
 /* }}} */
 
@@ -2648,6 +2629,7 @@ EXCEL_METHOD(Sheet, cellFormat)
 {
 	zval *object = ZEND_THIS;
 	SheetHandle sheet;
+	BookHandle book;
 	FormatHandle format;
 	zend_long row, col;
 	excel_format_object *fo;
@@ -2656,13 +2638,14 @@ EXCEL_METHOD(Sheet, cellFormat)
 		RETURN_FALSE;
 	}
 
-	SHEET_FROM_OBJECT(sheet, object);
+	SHEET_AND_BOOK_FROM_OBJECT(sheet, book, object);
 
 	format = xlSheetCellFormat(sheet, row, col);
 
 	ZVAL_OBJ(return_value, excel_object_new_format(excel_ce_format));
 	fo = Z_EXCEL_FORMAT_OBJ_P(return_value);
 	fo->format = format;
+	fo->book = book;
 }
 /* }}} */
 
@@ -2793,9 +2776,10 @@ EXCEL_METHOD(Sheet, readRow)
 
 	lc = col_start;
 
-	array_init(return_value);
+	array_init_size(return_value, col_end - col_start + 1);
 	while (lc < (col_end + 1)) {
 		zval value;
+		ZVAL_UNDEF(&value);
 		FormatHandle format = NULL;
 
 		if (!php_excel_read_cell(row, lc, &value, sheet, book, &format, read_formula)) {
@@ -2853,9 +2837,10 @@ EXCEL_METHOD(Sheet, readCol)
 
 	lc = row_start;
 
-	array_init(return_value);
+	array_init_size(return_value, row_end - row_start + 1);
 	while (lc < (row_end + 1)) {
 		zval value;
+		ZVAL_UNDEF(&value);
 		FormatHandle format = NULL;
 
 		if (!php_excel_read_cell(lc, col, &value, sheet, book, &format, read_formula)) {
@@ -4301,21 +4286,21 @@ EXCEL_METHOD(Sheet, getIndexRange)
 	zend_long index;
 	int rf, rl, cf, cl;
 	int hidden = 0;
-	zend_long scope_id = SCOPE_WORKBOOK;
+	int scope_out = SCOPE_WORKBOOK;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &index, &scope_id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	SHEET_FROM_OBJECT(sheet, object);
-	if (xlSheetNamedRange(sheet, (int)index, &rf, &rl, &cf, &cl, (int *)&scope_id, &hidden)) {
+	if (xlSheetNamedRange(sheet, (int)index, &rf, &rl, &cf, &cl, &scope_out, &hidden)) {
 		array_init(return_value);
 		add_assoc_long(return_value, "row_first", rf);
 		add_assoc_long(return_value, "row_last", rl);
 		add_assoc_long(return_value, "col_first", cf);
 		add_assoc_long(return_value, "col_last", cl);
 		add_assoc_bool(return_value, "hidden", hidden);
-		add_assoc_long(return_value, "scope", scope_id);
+		add_assoc_long(return_value, "scope", scope_out);
 	} else {
 		RETURN_FALSE;
 	}
@@ -5603,7 +5588,11 @@ EXCEL_METHOD(FilterColumn, filter)
 
 	FILTERCOLUMN_FROM_OBJECT(filtercolumn, object);
 
-	RETURN_STRING((char *)xlFilterColumnFilter(filtercolumn, filterIndex));
+	const char *val = xlFilterColumnFilter(filtercolumn, filterIndex);
+	if (!val) {
+		RETURN_FALSE;
+	}
+	RETURN_STRING((char *)val);
 }
 /* }}} */
 
@@ -5687,9 +5676,9 @@ EXCEL_METHOD(FilterColumn, getCustomFilter)
 
 	array_init(return_value);
 	add_assoc_long(return_value, "operator_1", op1);
-	add_assoc_string(return_value, "value_1", (char *)v1);
+	add_assoc_string(return_value, "value_1", v1 ? (char *)v1 : "");
 	add_assoc_long(return_value, "operator_2", op2);
-	add_assoc_string(return_value, "value_2", (char *)v2);
+	add_assoc_string(return_value, "value_2", v2 ? (char *)v2 : "");
 	add_assoc_bool(return_value, "and_operator", andOp);
 }
 /* }}} */
@@ -8884,7 +8873,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_getIndexRange, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, scope_id, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_namedRangeSize, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
