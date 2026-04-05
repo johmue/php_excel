@@ -1,6 +1,6 @@
 ## php_excel
 
-[![Version](https://img.shields.io/badge/version-2.0.0dev-blue.svg)](https://github.com/iliaal/php_excel/releases)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/iliaal/php_excel/releases)
 [![License: PHP-3.01](https://img.shields.io/badge/License-PHP--3.01-green.svg)](http://www.php.net/license/3_01.txt)
 [![Follow @iliaa](https://img.shields.io/badge/Follow-@iliaa-000000?style=flat&logo=x&logoColor=white)](https://x.com/intent/follow?screen_name=iliaa)
 
