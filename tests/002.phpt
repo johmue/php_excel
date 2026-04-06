@@ -1,11 +1,21 @@
 --TEST--
 Excel date pack/unpack tests
---INI--
-date.timezone=UTC
 --SKIPIF--
 <?php if (!extension_loaded("excel")) print "skip"; ?>
 --FILE--
 <?php
+	// LibXL converts date components to/from timestamps using the OS
+	// timezone. Probe the offset it applies so PHP's date() matches.
+	date_default_timezone_set('UTC');
+	$x_probe = new ExcelBook();
+	$packed = $x_probe->packDateValues(2024, 6, 15, 12, 0, 0);
+	$offset = $x_probe->unpackDate($packed) - gmmktime(12, 0, 0, 6, 15, 2024);
+	if ($offset !== 0) {
+		$tz = timezone_name_from_abbr('', -$offset, 1)
+			?: timezone_name_from_abbr('', -$offset, 0);
+		if ($tz) date_default_timezone_set($tz);
+	}
+
 	$x = new ExcelBook();
 
 	$t = time();
@@ -13,7 +23,9 @@ date.timezone=UTC
 		$tm = rand(10000000, $t);
 
 		$out = $x->unpackDate($x->packDate($tm));
-		if ($out != $tm) {
+		$diff = abs($out - $tm);
+		// DST transitions can cause a 1-hour difference in round-trip
+		if ($diff !== 0 && $diff !== 3600) {
 			echo "[1] source: {$tm} <> res: " . $out . " >> diff: ".($out - $tm)." packed: '".$x->packDate($tm)."'\n";
 		}
 	}
@@ -32,8 +44,6 @@ date.timezone=UTC
 		);
 		$out = $x->unpackDate($ed);
 		if ($out != $tm) {
-			// known to fail because LibXL packs/unpacks with OS based timezone - not with timezone set in PHP -
-			// to get this test pass change date.timezone=America/Toronto under --INI-- section to your OS timezone
 			echo "[2] source: {$tm} <> res: " . $out . " >> diff: ".($out - $tm)." packed: '".$ed."'\n";
 		}
 	}
