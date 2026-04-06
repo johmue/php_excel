@@ -150,10 +150,8 @@ jobs:
           export TEST_PHP_EXECUTABLE=/tmp/php-asan/bin/php
           export TEST_PHP_ARGS="-d extension=$(pwd)/modules/excel.so"
           export NO_INTERACTION=1
-          RESULT=$(/tmp/php-asan/bin/php run-tests.php --show-diff --asan -g FAIL,BORK,LEAK,XLEAK tests/ 2>&1)
-          echo "$RESULT"
-          FAILED=$(echo "$RESULT" | grep 'Tests failed' | grep -oP '\d+' | head -1)
-          if [ "$FAILED" -gt 0 ]; then
-            echo "::error::$FAILED test(s) failed"
+          /tmp/php-asan/bin/php run-tests.php --show-diff --asan -g FAIL,BORK,LEAK,XLEAK tests/ 2>&1 | tee /tmp/test-output.txt || true
+          if grep -qP 'Tests failed\s*:\s*[1-9]' /tmp/test-output.txt; then
+            echo "::error::Tests failed under ASAN"
             exit 1
           fi
