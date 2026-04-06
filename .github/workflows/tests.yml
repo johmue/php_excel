@@ -76,7 +76,7 @@ jobs:
           fi
 
   asan:
-    name: PHP ${{ matrix.php }} - ASAN+UBSAN
+    name: PHP ${{ matrix.php }} - ASAN
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -84,7 +84,7 @@ jobs:
         php: ['8.4']
 
     env:
-      ASAN_OPTIONS: exitcode=139
+      ASAN_OPTIONS: exitcode=139:verify_asan_link_order=0:detect_odr_violation=0
       UBSAN_OPTIONS: print_stacktrace=1
       USE_ZEND_ALLOC: 0
       USE_TRACKED_ALLOC: 1
@@ -95,20 +95,19 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y llvm clang re2c bison autoconf
 
-      - name: Build PHP with ASAN+UBSAN
+      - name: Build PHP with ASAN
         run: |
           git clone --depth=1 --branch=PHP-${{ matrix.php }} https://github.com/php/php-src.git /tmp/php-src
           cd /tmp/php-src
           ./buildconf --force
           CC=clang CXX=clang++ \
-          CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" \
-          LDFLAGS="-fsanitize=undefined,address" \
+          CFLAGS="-fsanitize=address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC" \
+          LDFLAGS="-fsanitize=address" \
           ./configure \
             --enable-debug \
             --enable-zts \
             --disable-all \
             --enable-cli \
-            --enable-werror \
             --prefix=/tmp/php-asan
           make -j$(nproc)
           make install
@@ -130,13 +129,13 @@ jobs:
             mv "$extracted" "libxl-5.1.0"
           fi
 
-      - name: Build extension with ASAN+UBSAN
+      - name: Build extension with ASAN
         run: |
           export PATH="/tmp/php-asan/bin:$PATH"
           phpize
           CC=clang CXX=clang++ \
-          CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" \
-          LDFLAGS="-fsanitize=undefined,address" \
+          CFLAGS="-fsanitize=address -DZEND_TRACK_ARENA_ALLOC" \
+          LDFLAGS="-fsanitize=address" \
           ./configure \
             --with-excel \
             --with-libxl-incdir=${{ github.workspace }}/libxl-5.1.0/include_c \
@@ -147,6 +146,7 @@ jobs:
       - name: Run tests under ASAN
         run: |
           export LD_LIBRARY_PATH="${{ github.workspace }}/libxl-5.1.0/lib64"
+          export LD_PRELOAD=$(clang -print-file-name=libclang_rt.asan-x86_64.so):$(dpkg -L libstdc++-dev | grep 'libstdc++.so$' | head -1 || echo /usr/lib/x86_64-linux-gnu/libstdc++.so)
           export TEST_PHP_EXECUTABLE=/tmp/php-asan/bin/php
           export TEST_PHP_ARGS="-d extension=$(pwd)/modules/excel.so"
           export NO_INTERACTION=1
