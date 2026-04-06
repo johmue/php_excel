@@ -67,7 +67,90 @@ jobs:
           export TEST_PHP_EXECUTABLE=$(which php)
           export TEST_PHP_ARGS="-d extension=$(pwd)/modules/excel.so"
           export NO_INTERACTION=1
-          RESULT=$(php run-tests.php --show-diff tests/ 2>&1)
+          RESULT=$(php run-tests.php --show-diff -g FAIL,BORK,LEAK,XLEAK tests/ 2>&1)
+          echo "$RESULT"
+          FAILED=$(echo "$RESULT" | grep 'Tests failed' | grep -oP '\d+' | head -1)
+          if [ "$FAILED" -gt 0 ]; then
+            echo "::error::$FAILED test(s) failed"
+            exit 1
+          fi
+
+  asan:
+    name: PHP ${{ matrix.php }} - ASAN+UBSAN
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4']
+
+    env:
+      ASAN_OPTIONS: exitcode=139
+      UBSAN_OPTIONS: print_stacktrace=1
+      USE_ZEND_ALLOC: 0
+      USE_TRACKED_ALLOC: 1
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y llvm
+
+      - name: Build PHP with ASAN+UBSAN
+        run: |
+          git clone --depth=1 --branch=PHP-${{ matrix.php }} https://github.com/php/php-src.git /tmp/php-src
+          cd /tmp/php-src
+          ./buildconf --force
+          CC=clang CXX=clang++ \
+          CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" \
+          LDFLAGS="-fsanitize=undefined,address" \
+          ./configure \
+            --enable-debug \
+            --enable-zts \
+            --disable-all \
+            --enable-cli \
+            --enable-werror \
+            --prefix=/tmp/php-asan
+          make -j$(nproc)
+          make install
+
+      - name: Cache LibXL
+        id: cache-libxl
+        uses: actions/cache@v5
+        with:
+          path: libxl-5.1.0
+          key: libxl-lin-5.1.0-v1
+
+      - name: Download LibXL
+        if: steps.cache-libxl.outputs.cache-hit != 'true'
+        run: |
+          curl -fsSL "https://www.libxl.com/download/libxl-lin-5.1.0.tar.gz" -o libxl.tar.gz
+          tar xzf libxl.tar.gz
+          extracted=$(ls -d libxl-* | grep -v tar | head -1)
+          if [ "$extracted" != "libxl-5.1.0" ]; then
+            mv "$extracted" "libxl-5.1.0"
+          fi
+
+      - name: Build extension with ASAN+UBSAN
+        run: |
+          export PATH="/tmp/php-asan/bin:$PATH"
+          phpize
+          CC=clang CXX=clang++ \
+          CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" \
+          LDFLAGS="-fsanitize=undefined,address" \
+          ./configure \
+            --with-excel \
+            --with-libxl-incdir=${{ github.workspace }}/libxl-5.1.0/include_c \
+            --with-libxl-libdir=${{ github.workspace }}/libxl-5.1.0/lib64 \
+            --with-php-config=/tmp/php-asan/bin/php-config
+          make -j$(nproc)
+
+      - name: Run tests under ASAN
+        run: |
+          export LD_LIBRARY_PATH="${{ github.workspace }}/libxl-5.1.0/lib64"
+          export TEST_PHP_EXECUTABLE=/tmp/php-asan/bin/php
+          export TEST_PHP_ARGS="-d extension=$(pwd)/modules/excel.so"
+          export NO_INTERACTION=1
+          RESULT=$(/tmp/php-asan/bin/php run-tests.php --show-diff --asan -g FAIL,BORK,LEAK,XLEAK tests/ 2>&1)
           echo "$RESULT"
           FAILED=$(echo "$RESULT" | grep 'Tests failed' | grep -oP '\d+' | head -1)
           if [ "$FAILED" -gt 0 ]; then
