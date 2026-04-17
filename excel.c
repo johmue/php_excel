@@ -2742,6 +2742,16 @@ EXCEL_METHOD(Sheet, __construct)
 }
 /* }}} */
 
+/* {{{ proto bool ExcelSheet::isValid()
+	Check if the sheet object is still valid (not pointing to a deleted sheet). */
+EXCEL_METHOD(Sheet, isValid)
+{
+	zval *object = ZEND_THIS;
+	excel_sheet_object *obj = Z_EXCEL_SHEET_OBJ_P(object);
+	RETURN_BOOL(obj->sheet != NULL);
+}
+/* }}} */
+
 /* {{{ proto int ExcelSheet::cellType(int row, int column)
 	Get cell type */
 EXCEL_METHOD(Sheet, cellType)
@@ -8636,6 +8646,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_Sheet_isValid, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_Sheet_cellType, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, row, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_LONG, 0)
@@ -9895,6 +9908,7 @@ const zend_function_entry excel_funcs_book[] = {
 
 const zend_function_entry excel_funcs_sheet[] = {
 	EXCEL_ME(Sheet, __construct, arginfo_Sheet___construct, ZEND_ACC_PUBLIC)
+	EXCEL_ME(Sheet, isValid, arginfo_Sheet_isValid, ZEND_ACC_PUBLIC)
 	EXCEL_ME(Sheet, cellType, arginfo_Sheet_cellType, 0)
 	EXCEL_ME(Sheet, cellFormat, arginfo_Sheet_cellFormat, 0)
 	EXCEL_ME(Sheet, setCellFormat, arginfo_Sheet_setCellFormat, 0)
