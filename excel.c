@@ -88,6 +88,7 @@ PHP_INI_END()
 		excel_object_handlers_ ## c_name .offset = XtOffsetOf(excel_ ## c_name ## _object, std); \
 		excel_object_handlers_ ## c_name .free_obj = excel_ ## c_name ## _object_free_storage; \
 		excel_object_handlers_ ## c_name .clone_obj = clone; \
+		excel_object_handlers_ ## c_name .get_gc = excel_get_gc_ ## c_name; \
 	}
 
 zend_class_entry *excel_ce_book, *excel_ce_sheet, *excel_ce_format, *excel_ce_font, *excel_ce_filtercolumn, *excel_ce_autofilter;
@@ -392,6 +393,34 @@ static inline excel_table_object *php_excel_table_object_fetch_object(zend_objec
 			RETURN_FALSE; \
 		} \
 	}
+
+#define EXCEL_GET_GC_HANDLER(c_name) \
+static HashTable *excel_get_gc_ ## c_name(zend_object *object, zval **table, int *n) \
+{ \
+	excel_ ## c_name ## _object *intern = php_excel_ ## c_name ## _object_fetch_object(object); \
+	*table = &intern->parent; \
+	*n = 1; \
+	return zend_std_get_properties(object); \
+}
+
+static HashTable *excel_get_gc_book(zend_object *object, zval **table, int *n)
+{
+	*table = NULL;
+	*n = 0;
+	return zend_std_get_properties(object);
+}
+
+EXCEL_GET_GC_HANDLER(sheet)
+EXCEL_GET_GC_HANDLER(font)
+EXCEL_GET_GC_HANDLER(format)
+EXCEL_GET_GC_HANDLER(autofilter)
+EXCEL_GET_GC_HANDLER(filtercolumn)
+EXCEL_GET_GC_HANDLER(richstring)
+EXCEL_GET_GC_HANDLER(formcontrol)
+EXCEL_GET_GC_HANDLER(conditionalformat)
+EXCEL_GET_GC_HANDLER(conditionalformatting)
+EXCEL_GET_GC_HANDLER(coreproperties)
+EXCEL_GET_GC_HANDLER(table)
 
 static void excel_book_object_free_storage(zend_object *object)
 {
