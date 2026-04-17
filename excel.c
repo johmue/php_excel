@@ -108,6 +108,7 @@ static zend_object_handlers excel_object_handlers_table;
 
 typedef struct _excel_book_object {
 	BookHandle book;
+	HashTable sheets;
 	zend_object std;
 } excel_book_object;
 
@@ -115,7 +116,7 @@ static inline excel_book_object *php_excel_book_object_fetch_object(zend_object 
 	return (excel_book_object *)((char *)(obj) - XtOffsetOf(excel_book_object, std));
 }
 
-#define Z_EXCEL_BOOK_OBJ_P(zv) php_excel_book_object_fetch_object(Z_OBJ_P(zv));
+#define Z_EXCEL_BOOK_OBJ_P(zv) php_excel_book_object_fetch_object(Z_OBJ_P(zv))
 
 #define BOOK_FROM_OBJECT(book, object) \
 	{ \
@@ -138,7 +139,18 @@ static inline excel_sheet_object *php_excel_sheet_object_fetch_object(zend_objec
 	return (excel_sheet_object *)((char *)(obj) - XtOffsetOf(excel_sheet_object, std));
 }
 
-#define Z_EXCEL_SHEET_OBJ_P(zv) php_excel_sheet_object_fetch_object(Z_OBJ_P(zv));
+#define Z_EXCEL_SHEET_OBJ_P(zv) php_excel_sheet_object_fetch_object(Z_OBJ_P(zv))
+
+static inline void php_excel_book_track_sheet(zval *book_zval, excel_sheet_object *sheet_obj) {
+	excel_book_object *book_obj = Z_EXCEL_BOOK_OBJ_P(book_zval);
+	zend_hash_index_update_ptr(&book_obj->sheets, (zend_ulong)(uintptr_t)sheet_obj, sheet_obj);
+}
+static inline void php_excel_book_untrack_sheet(zval *book_zval, excel_sheet_object *sheet_obj) {
+	if (Z_TYPE_P(book_zval) == IS_OBJECT) {
+		excel_book_object *book_obj = Z_EXCEL_BOOK_OBJ_P(book_zval);
+		zend_hash_index_del(&book_obj->sheets, (zend_ulong)(uintptr_t)sheet_obj);
+	}
+}
 
 #define SHEET_FROM_OBJECT(sheet, object) \
 	{ \
@@ -171,7 +183,7 @@ typedef struct _excel_font_object {
 static inline excel_font_object *php_excel_font_object_fetch_object(zend_object *obj) {
 	return (excel_font_object *)((char *)(obj) - XtOffsetOf(excel_font_object, std));
 }
-#define Z_EXCEL_FONT_OBJ_P(zv) php_excel_font_object_fetch_object(Z_OBJ_P(zv));
+#define Z_EXCEL_FONT_OBJ_P(zv) php_excel_font_object_fetch_object(Z_OBJ_P(zv))
 
 #define FONT_FROM_OBJECT(font, object) \
 	{ \
@@ -223,7 +235,7 @@ typedef struct _excel_format_object {
 static inline excel_format_object *php_excel_format_object_fetch_object(zend_object *obj) {
 	return (excel_format_object *)((char *)(obj) - XtOffsetOf(excel_format_object, std));
 }
-#define Z_EXCEL_FORMAT_OBJ_P(zv) php_excel_format_object_fetch_object(Z_OBJ_P(zv));
+#define Z_EXCEL_FORMAT_OBJ_P(zv) php_excel_format_object_fetch_object(Z_OBJ_P(zv))
 
 typedef struct _excel_autofilter_object {
 	AutoFilterHandle autofilter;
@@ -235,7 +247,7 @@ typedef struct _excel_autofilter_object {
 static inline excel_autofilter_object *php_excel_autofilter_object_fetch_object(zend_object *obj) {
 	return (excel_autofilter_object *)((char *)(obj) - XtOffsetOf(excel_autofilter_object, std));
 }
-#define Z_EXCEL_AUTOFILTER_OBJ_P(zv) php_excel_autofilter_object_fetch_object(Z_OBJ_P(zv));
+#define Z_EXCEL_AUTOFILTER_OBJ_P(zv) php_excel_autofilter_object_fetch_object(Z_OBJ_P(zv))
 
 typedef struct _excel_filtercolumn_object {
 	FilterColumnHandle filtercolumn;
@@ -247,7 +259,7 @@ typedef struct _excel_filtercolumn_object {
 static inline excel_filtercolumn_object *php_excel_filtercolumn_object_fetch_object(zend_object *obj) {
 	return (excel_filtercolumn_object *)((char *)(obj) - XtOffsetOf(excel_filtercolumn_object, std));
 }
-#define Z_EXCEL_FILTERCOLUMN_OBJ_P(zv) php_excel_filtercolumn_object_fetch_object(Z_OBJ_P(zv));
+#define Z_EXCEL_FILTERCOLUMN_OBJ_P(zv) php_excel_filtercolumn_object_fetch_object(Z_OBJ_P(zv))
 
 typedef struct _excel_richstring_object {
 	RichStringHandle richstring;
@@ -259,7 +271,7 @@ typedef struct _excel_richstring_object {
 static inline excel_richstring_object *php_excel_richstring_object_fetch_object(zend_object *obj) {
 	return (excel_richstring_object *)((char *)(obj) - XtOffsetOf(excel_richstring_object, std));
 }
-#define Z_EXCEL_RICHSTRING_OBJ_P(zv) php_excel_richstring_object_fetch_object(Z_OBJ_P(zv));
+#define Z_EXCEL_RICHSTRING_OBJ_P(zv) php_excel_richstring_object_fetch_object(Z_OBJ_P(zv))
 
 #define RICHSTRING_FROM_OBJECT(rs_var, object) \
 	{ \
@@ -281,7 +293,7 @@ typedef struct _excel_formcontrol_object {
 static inline excel_formcontrol_object *php_excel_formcontrol_object_fetch_object(zend_object *obj) {
 	return (excel_formcontrol_object *)((char *)(obj) - XtOffsetOf(excel_formcontrol_object, std));
 }
-#define Z_EXCEL_FORMCONTROL_OBJ_P(zv) php_excel_formcontrol_object_fetch_object(Z_OBJ_P(zv));
+#define Z_EXCEL_FORMCONTROL_OBJ_P(zv) php_excel_formcontrol_object_fetch_object(Z_OBJ_P(zv))
 
 #define FORMCONTROL_FROM_OBJECT(fc_var, object) \
 	{ \
@@ -303,7 +315,7 @@ typedef struct _excel_conditionalformat_object {
 static inline excel_conditionalformat_object *php_excel_conditionalformat_object_fetch_object(zend_object *obj) {
 	return (excel_conditionalformat_object *)((char *)(obj) - XtOffsetOf(excel_conditionalformat_object, std));
 }
-#define Z_EXCEL_CONDITIONALFORMAT_OBJ_P(zv) php_excel_conditionalformat_object_fetch_object(Z_OBJ_P(zv));
+#define Z_EXCEL_CONDITIONALFORMAT_OBJ_P(zv) php_excel_conditionalformat_object_fetch_object(Z_OBJ_P(zv))
 
 #define CONDITIONALFORMAT_FROM_OBJECT(cf_var, object) \
 	{ \
@@ -325,7 +337,7 @@ typedef struct _excel_conditionalformatting_object {
 static inline excel_conditionalformatting_object *php_excel_conditionalformatting_object_fetch_object(zend_object *obj) {
 	return (excel_conditionalformatting_object *)((char *)(obj) - XtOffsetOf(excel_conditionalformatting_object, std));
 }
-#define Z_EXCEL_CONDITIONALFORMATTING_OBJ_P(zv) php_excel_conditionalformatting_object_fetch_object(Z_OBJ_P(zv));
+#define Z_EXCEL_CONDITIONALFORMATTING_OBJ_P(zv) php_excel_conditionalformatting_object_fetch_object(Z_OBJ_P(zv))
 
 #define CONDITIONALFORMATTING_FROM_OBJECT(cfing_var, object) \
 	{ \
@@ -347,7 +359,7 @@ typedef struct _excel_coreproperties_object {
 static inline excel_coreproperties_object *php_excel_coreproperties_object_fetch_object(zend_object *obj) {
 	return (excel_coreproperties_object *)((char *)(obj) - XtOffsetOf(excel_coreproperties_object, std));
 }
-#define Z_EXCEL_COREPROPERTIES_OBJ_P(zv) php_excel_coreproperties_object_fetch_object(Z_OBJ_P(zv));
+#define Z_EXCEL_COREPROPERTIES_OBJ_P(zv) php_excel_coreproperties_object_fetch_object(Z_OBJ_P(zv))
 
 #define COREPROPERTIES_FROM_OBJECT(cp_var, object) \
 	{ \
@@ -369,7 +381,7 @@ typedef struct _excel_table_object {
 static inline excel_table_object *php_excel_table_object_fetch_object(zend_object *obj) {
 	return (excel_table_object *)((char *)(obj) - XtOffsetOf(excel_table_object, std));
 }
-#define Z_EXCEL_TABLE_OBJ_P(zv) php_excel_table_object_fetch_object(Z_OBJ_P(zv));
+#define Z_EXCEL_TABLE_OBJ_P(zv) php_excel_table_object_fetch_object(Z_OBJ_P(zv))
 
 #define TABLE_FROM_OBJECT(tbl_var, object) \
 	{ \
@@ -384,12 +396,20 @@ static inline excel_table_object *php_excel_table_object_fetch_object(zend_objec
 static void excel_book_object_free_storage(zend_object *object)
 {
 	excel_book_object *intern = php_excel_book_object_fetch_object(object);
-	zend_object_std_dtor(&intern->std);
+
+	excel_sheet_object *sobj;
+	ZEND_HASH_FOREACH_PTR(&intern->sheets, sobj) {
+		sobj->sheet = NULL;
+		sobj->book = NULL;
+	} ZEND_HASH_FOREACH_END();
+	zend_hash_destroy(&intern->sheets);
 
 	if (intern->book) {
 		xlBookRelease(intern->book);
 		intern->book = NULL;
 	}
+
+	zend_object_std_dtor(&intern->std);
 }
 
 static zend_object *excel_object_new_book(zend_class_entry *class_type)
@@ -402,6 +422,7 @@ static zend_object *excel_object_new_book(zend_class_entry *class_type)
 	object_properties_init(&intern->std, class_type);
 
 	intern->book = NULL;
+	zend_hash_init(&intern->sheets, 8, NULL, NULL, 0);
 	intern->std.handlers = &excel_object_handlers_book;
 
 	return &intern->std;
@@ -410,6 +431,11 @@ static zend_object *excel_object_new_book(zend_class_entry *class_type)
 static void excel_sheet_object_free_storage(zend_object *object)
 {
 	excel_sheet_object *intern = php_excel_sheet_object_fetch_object(object);
+
+	if (intern->book && !Z_ISUNDEF(intern->parent)) {
+		php_excel_book_untrack_sheet(&intern->parent, intern);
+	}
+
 	zval_ptr_dtor(&intern->parent);
 	zend_object_std_dtor(&intern->std);
 }
@@ -863,6 +889,7 @@ EXCEL_METHOD(Book, getSheet)
 	fo->sheet = sh;
 	fo->book = book;
 	ZVAL_COPY(&fo->parent, object);
+	php_excel_book_track_sheet(object, fo);
 }
 /* }}} */
 
@@ -899,6 +926,7 @@ EXCEL_METHOD(Book, getSheetByName)
 					fo->sheet = sh;
 					fo->book = book;
 					ZVAL_COPY(&fo->parent, object);
+					php_excel_book_track_sheet(object, fo);
 					return;
 				}
 			}
@@ -927,7 +955,24 @@ EXCEL_METHOD(Book, deleteSheet)
 
 	BOOK_FROM_OBJECT(book, object);
 
-	RETURN_BOOL(xlBookDelSheet(book, sheet));
+	SheetHandle doomed_sheet = xlBookGetSheet(book, sheet);
+	if (!xlBookDelSheet(book, sheet)) {
+		RETURN_FALSE;
+	}
+
+	/* Invalidate PHP ExcelSheet objects pointing to the deleted sheet */
+	if (doomed_sheet) {
+		excel_book_object *bobj = Z_EXCEL_BOOK_OBJ_P(object);
+		excel_sheet_object *sobj;
+		ZEND_HASH_FOREACH_PTR(&bobj->sheets, sobj) {
+			if (sobj->sheet == doomed_sheet) {
+				sobj->sheet = NULL;
+				sobj->book = NULL;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -987,6 +1032,7 @@ EXCEL_METHOD(Book, addSheet)
 	fo->sheet = sh;
 	fo->book = book;
 	ZVAL_COPY(&fo->parent, object);
+	php_excel_book_track_sheet(object, fo);
 }
 /* }}} */
 
@@ -1028,6 +1074,7 @@ EXCEL_METHOD(Book, copySheet)
 	fo->sheet = sh;
 	fo->book = book;
 	ZVAL_COPY(&fo->parent, object);
+	php_excel_book_track_sheet(object, fo);
 }
 /* }}} */
 
@@ -1494,6 +1541,12 @@ EXCEL_METHOD(Book, __construct)
 
 	{
 		excel_book_object *obj = Z_EXCEL_BOOK_OBJ_P(object);
+
+		if (obj->book) {
+			zend_throw_exception(NULL, "ExcelBook object already initialized.", 0);
+			RETURN_THROWS();
+		}
+
 		if (new_excel) {
 			book = xlCreateXMLBook();
 		} else {
@@ -2248,6 +2301,11 @@ EXCEL_METHOD(Format, __construct)
 
 	obj = Z_EXCEL_FORMAT_OBJ_P(object);
 
+	if (obj->format) {
+		zend_throw_exception(NULL, "ExcelFormat object already initialized.", 0);
+		RETURN_THROWS();
+	}
+
 	format = xlBookAddFormat(book, NULL);
 	if (!format) {
 		zend_throw_exception(NULL, "Failed to add format", 0);
@@ -2277,6 +2335,11 @@ EXCEL_METHOD(Font, __construct)
 	BOOK_FROM_OBJECT(book, zbook);
 
 	obj = Z_EXCEL_FONT_OBJ_P(object);
+
+	if (obj->font) {
+		zend_throw_exception(NULL, "ExcelFont object already initialized.", 0);
+		RETURN_THROWS();
+	}
 
 	font = xlBookAddFont(book, NULL);
 	if (!font) {
@@ -2631,6 +2694,11 @@ EXCEL_METHOD(Sheet, __construct)
 	BOOK_FROM_OBJECT(book, zbook);
 
 	obj = Z_EXCEL_SHEET_OBJ_P(object);
+
+	if (obj->sheet) {
+		zend_throw_exception(NULL, "ExcelSheet object already initialized.", 0);
+		RETURN_THROWS();
+	}
 
 	sh = xlBookAddSheet(book, ZSTR_VAL(name_zs), 0);
 
@@ -4600,6 +4668,7 @@ EXCEL_METHOD(Book, insertSheet)
 	fo->sheet = sh;
 	fo->book = book;
 	ZVAL_COPY(&fo->parent, object);
+	php_excel_book_track_sheet(object, fo);
 }
 /* }}} */
 
@@ -5355,6 +5424,11 @@ EXCEL_METHOD(AutoFilter, __construct)
 
 	obj = Z_EXCEL_AUTOFILTER_OBJ_P(object);
 
+	if (obj->autofilter) {
+		zend_throw_exception(NULL, "ExcelAutoFilter object already initialized.", 0);
+		RETURN_THROWS();
+	}
+
 	afh = xlSheetAutoFilter(sheet);
 
 	if (!afh) {
@@ -5570,6 +5644,11 @@ EXCEL_METHOD(FilterColumn, __construct)
 	AUTOFILTER_FROM_OBJECT(autofilter, zautofilter);
 
 	obj = Z_EXCEL_FILTERCOLUMN_OBJ_P(object);
+
+	if (obj->filtercolumn) {
+		zend_throw_exception(NULL, "ExcelFilterColumn object already initialized.", 0);
+		RETURN_THROWS();
+	}
 
 	fch = xlAutoFilterColumn(autofilter, colId);
 
@@ -6550,6 +6629,11 @@ EXCEL_METHOD(RichString, __construct)
 
 	obj = Z_EXCEL_RICHSTRING_OBJ_P(object);
 
+	if (obj->richstring) {
+		zend_throw_exception(NULL, "ExcelRichString object already initialized.", 0);
+		RETURN_THROWS();
+	}
+
 	rs = xlBookAddRichString(book);
 	if (!rs) {
 		zend_throw_exception(NULL, "Failed to create rich string", 0);
@@ -6686,6 +6770,11 @@ EXCEL_METHOD(FormControl, __construct)
 	SHEET_FROM_OBJECT(sheet, zsheet);
 
 	obj = Z_EXCEL_FORMCONTROL_OBJ_P(object);
+
+	if (obj->formcontrol) {
+		zend_throw_exception(NULL, "ExcelFormControl object already initialized.", 0);
+		RETURN_THROWS();
+	}
 
 	fc = xlSheetFormControl(sheet, index);
 	if (!fc) {
@@ -7206,6 +7295,11 @@ EXCEL_METHOD(ConditionalFormat, __construct)
 
 	obj = Z_EXCEL_CONDITIONALFORMAT_OBJ_P(object);
 
+	if (obj->conditionalformat) {
+		zend_throw_exception(NULL, "ExcelConditionalFormat object already initialized.", 0);
+		RETURN_THROWS();
+	}
+
 	cf = xlBookAddConditionalFormat(book);
 	if (!cf) {
 		zend_throw_exception(NULL, "Failed to create conditional format", 0);
@@ -7567,6 +7661,11 @@ EXCEL_METHOD(ConditionalFormatting, __construct)
 
 	obj = Z_EXCEL_CONDITIONALFORMATTING_OBJ_P(object);
 
+	if (obj->conditionalformatting) {
+		zend_throw_exception(NULL, "ExcelConditionalFormatting object already initialized.", 0);
+		RETURN_THROWS();
+	}
+
 #if LIBXL_VERSION >= 0x05010000
 	cfh = xlSheetAddConditionalFormatting(sheet, rowFirst, rowLast, colFirst, colLast);
 #else
@@ -7806,6 +7905,11 @@ EXCEL_METHOD(CoreProperties, __construct)
 
 	obj = Z_EXCEL_COREPROPERTIES_OBJ_P(object);
 
+	if (obj->coreproperties) {
+		zend_throw_exception(NULL, "ExcelCoreProperties object already initialized.", 0);
+		RETURN_THROWS();
+	}
+
 	cp = xlBookCoreProperties(book);
 	if (!cp) {
 		zend_throw_exception(NULL, "Failed to get core properties", 0);
@@ -7933,6 +8037,11 @@ EXCEL_METHOD(Table, __construct)
 	SHEET_FROM_OBJECT(sheet, zsheet);
 
 	obj = Z_EXCEL_TABLE_OBJ_P(object);
+
+	if (obj->table) {
+		zend_throw_exception(NULL, "ExcelTable object already initialized.", 0);
+		RETURN_THROWS();
+	}
 
 	th = xlSheetAddTable(sheet, ZSTR_VAL(name), rowFirst, rowLast, colFirst, colLast, hasHeaders, style);
 	if (!th) {
