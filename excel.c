@@ -10761,6 +10761,15 @@ PHP_MINIT_FUNCTION(excel)
 }
 /* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
+PHP_MSHUTDOWN_FUNCTION(excel)
+{
+	UNREGISTER_INI_ENTRIES();
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(excel)
@@ -10769,9 +10778,9 @@ PHP_MINFO_FUNCTION(excel)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "excel support", "enabled");
-	php_info_print_table_header(2, "Excel Version", PHP_EXCEL_VERSION);
+	php_info_print_table_row(2, "Excel Version", PHP_EXCEL_VERSION);
 	snprintf(temp_api, sizeof(temp_api), "%x", LIBXL_VERSION);
-	php_info_print_table_header(2, "LibXL Version", temp_api);
+	php_info_print_table_row(2, "LibXL Version", temp_api);
 	php_info_print_table_end();
 }
 /* }}} */
@@ -10798,7 +10807,7 @@ zend_module_entry excel_module_entry = {
 	"excel",
 	excel_functions,
 	PHP_MINIT(excel),
-	NULL,
+	PHP_MSHUTDOWN(excel),
 	NULL,
 	NULL,
 	PHP_MINFO(excel),
